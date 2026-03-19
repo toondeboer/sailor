@@ -7,6 +7,6 @@
     "dev": "nodemon index.handler"
   },
   "dependencies": {
-    "aws-sdk": "^2.1164.0"
+    "aws-sdk": "^2.1693.0"
   }
 }
