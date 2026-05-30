@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Stock, YahooObject } from '@aws/util';
+import { map, Observable } from 'rxjs';
+import { parseYahooObjects, Stock, YahooObject } from '@aws/util';
 
 @Injectable({
   providedIn: 'root',
@@ -40,6 +40,8 @@ export class YahooService {
       start: start,
       end: end,
     };
-    return this.http.post<YahooObject[]>(this.environment.yahooLambdaUrl, body);
+    return this.http
+      .post<unknown>(this.environment.yahooLambdaUrl, body)
+      .pipe(map((response) => parseYahooObjects(response)));
   }
 }
