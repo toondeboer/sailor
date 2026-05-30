@@ -676,11 +676,15 @@ export function getReturn(
     )
   );
   const absolute = mostRecentProfit.value - profitDaysAgo.value;
+  const mostRecentPortfolioValue =
+    getMostRecentValueFromList(portfolioValues).value;
 
   return {
     absolute,
     percentage:
-      (absolute / getMostRecentValueFromList(portfolioValues).value) * 100,
+      mostRecentPortfolioValue !== 0
+        ? (absolute / mostRecentPortfolioValue) * 100
+        : 0,
   };
 }
 

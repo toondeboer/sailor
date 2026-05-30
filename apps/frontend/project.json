@@ -17,6 +17,9 @@
         "tsConfig": "apps/frontend/tsconfig.app.json",
         "assets": ["apps/frontend/src/favicon.ico", "apps/frontend/src/assets"],
         "styles": ["apps/frontend/src/styles.scss"],
+        "stylePreprocessorOptions": {
+          "includePaths": ["apps/frontend/src/styles"]
+        },
         "scripts": []
       },
       "configurations": {
@@ -35,8 +38,8 @@
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "4kb",
-              "maximumError": "5kb"
+              "maximumWarning": "8kb",
+              "maximumError": "10kb"
             }
           ],
           "outputHashing": "all"

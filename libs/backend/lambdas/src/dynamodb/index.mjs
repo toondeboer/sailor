@@ -1,8 +1,56 @@
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
 
 let dynamoDB;
+
+// --- Cognito JWT verification config ---
+// Values default to the known dev pool but should be supplied via environment
+// variables per deployment. AWS_REGION is provided by the Lambda runtime.
+const region = process.env.AWS_REGION || 'us-east-1';
+const userPoolId = process.env.COGNITO_USER_POOL_ID || 'us-east-1_liCB4LgDE';
+const clientId = process.env.COGNITO_CLIENT_ID || '3o34bbl92faeo9ljo11eebtim2';
+const issuer = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`;
+
+const jwks = jwksClient({
+  jwksUri: `${issuer}/.well-known/jwks.json`,
+  cache: true,
+  cacheMaxEntries: 5,
+  cacheMaxAge: 10 * 60 * 1000, // 10 minutes
+  rateLimit: true,
+});
+
+function getSigningKey(header, callback) {
+  jwks.getSigningKey(header.kid, (err, key) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, key.getPublicKey());
+  });
+}
+
+// Verify the Cognito ID token's signature, issuer, audience and expiry.
+// Rejects anything that is not a valid, unexpired ID token from our pool.
+function verifyToken(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      token,
+      getSigningKey,
+      { issuer, audience: clientId, algorithms: ['RS256'] },
+      (err, decoded) => {
+        if (err) {
+          reject(err);
+        } else if (decoded.token_use !== 'id') {
+          reject(new Error('Invalid token_use; expected an ID token'));
+        } else {
+          resolve(decoded);
+        }
+      }
+    );
+  });
+}
 
 // Determine the current environment (default to 'dev')
 const currentEnv = process.env.ENVIRONMENT || 'dev';
@@ -22,12 +70,30 @@ if (currentEnv === 'dev') {
   dynamoDB = DynamoDBDocument.from(new DynamoDB());
 }
 
-const headers = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'OPTIONS,GET,POST',
-  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-};
+// Comma-separated allowlist of origins permitted to call this API. A single
+// Access-Control-Allow-Origin can only name one origin, so we reflect the
+// caller's Origin when it is on the list (supporting local dev + prod at once).
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS ||
+  'http://localhost:4200,https://investments-tracker.toondeboer.com'
+)
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+function buildHeaders(event) {
+  const requestOrigin = event.headers?.origin || event.headers?.Origin || '';
+  const allowOrigin = allowedOrigins.includes(requestOrigin)
+    ? requestOrigin
+    : allowedOrigins[0];
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'OPTIONS,GET,PUT,POST,DELETE',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    Vary: 'Origin',
+  };
+}
 
 const tableName = 'Investment_Tracker';
 
@@ -44,6 +110,14 @@ const tableName = 'Investment_Tracker';
 export const handler = async (event) => {
   console.log('Received event', event);
 
+  const headers = buildHeaders(event);
+
+  // Answer the CORS preflight before auth: browsers omit the Authorization
+  // header on OPTIONS, so gating it behind auth would 401 every preflight.
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, body: '', headers };
+  }
+
   let body;
   let statusCode = '200';
 
@@ -56,18 +130,19 @@ export const handler = async (event) => {
       return {
         statusCode: 401,
         body: JSON.stringify({ message: 'Unauthorized: Missing token' }),
+        headers,
       };
     }
 
-    // Decode and verify the token
-    const decodedToken = jwt.decode(token);
+    // Verify the token signature/claims (NOT just decode) before trusting `sub`
+    const decodedToken = await verifyToken(token);
 
-    // Extract user information (e.g., sub, email, or custom claims)
-    userId = decodedToken.sub; // Cognito User Pool ID
+    // Extract user information from the verified claims
+    userId = decodedToken.sub; // Cognito user id (subject)
   } catch (error) {
     return {
-      statusCode: '401',
-      body: err.message,
+      statusCode: 401,
+      body: JSON.stringify({ message: `Unauthorized: ${error.message}` }),
       headers,
     };
   }
@@ -99,8 +174,6 @@ export const handler = async (event) => {
             ReturnValues: 'ALL_NEW',
           })
         ).Attributes.transactions;
-        break;
-      case 'OPTIONS':
         break;
       default:
         throw new Error(`Unsupported method "${event.httpMethod}"`);
