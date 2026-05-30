@@ -44,17 +44,19 @@ node libs/backend/lambdas/src/dynamodb/init-dynamodb.js
 ### 2. Start the backend APIs (AWS SAM)
 
 ```
-sam build
+node libs/backend/lambdas/build.mjs
 sam local start-api
 ```
 
-This serves the Lambda functions on `http://localhost:3000`. `sam build` installs each Lambda's
-dependencies (including `jwks-rsa`, used for token verification) and `sam local start-api` reads
-configuration — Cognito user-pool/client IDs and allowed CORS origins — from `template.yaml`.
+`build.mjs` bundles each Lambda (with its dependencies, e.g. `jwks-rsa`) into a single file under
+`dist/lambdas/<name>/`, which is where `template.yaml`'s `CodeUri` points. `sam local start-api`
+then serves the functions on `http://localhost:3000`, reading configuration — Cognito
+user-pool/client IDs and allowed CORS origins — from `template.yaml` parameter defaults.
 
 > **Note:** the DynamoDB Lambda verifies the Cognito **ID token** on every request, so it needs
 > internet access to fetch the Cognito JWKS, and you must be signed in through the frontend (which
-> supplies a valid token). Re-run `sam build` whenever you change a Lambda's code or dependencies.
+> supplies a valid token). Re-run `node libs/backend/lambdas/build.mjs` whenever you change a
+> Lambda's code.
 
 ### 3. Start the frontend
 
@@ -75,13 +77,38 @@ SAM APIs on `:3000` (see `apps/frontend/proxy.conf.json`).
 | `nx build frontend` | Production build of the frontend |
 | `node libs/backend/lambdas/build.mjs` | Bundle the Lambdas (what CI does before deploy) |
 
-## Deployment
+## Deployment (Infrastructure as Code)
 
-CI (`buildspec.yml`) builds the frontend, bundles each Lambda into a single self-contained file
-with esbuild (`libs/backend/lambdas/build.mjs`), and deploys the functions with
-`aws lambda update-function-code`. The frontend bundle is published as the build artifact.
+The backend is managed as code with AWS SAM/CloudFormation. `template.yaml` defines the two
+Lambdas, a single API Gateway, and their environment variables; `samconfig.toml` holds the
+per-environment deploy settings (stack name, region, parameters).
 
-> **Production configuration:** the Lambdas read `ALLOWED_ORIGINS`, `COGNITO_USER_POOL_ID` and
-> `COGNITO_CLIENT_ID` from their environment. `template.yaml` sets dev-friendly defaults; the
-> deployed functions should have these set to the production values (the deploy step updates code
-> only, not configuration).
+CI (`buildspec.yml`) builds the frontend, bundles the Lambdas (`libs/backend/lambdas/build.mjs`),
+and runs `sam deploy --config-env prod` to provision/update the whole stack. The frontend bundle
+is published as the build artifact. Production parameters (prod CORS origin, Cognito IDs) live in
+`samconfig.toml`'s `[prod.deploy.parameters]`.
+
+> **CodeBuild role:** `sam deploy` needs permission to manage CloudFormation, IAM, API Gateway,
+> Lambda and S3 — broader than the old `update-function-code` flow. Grant these to the CodeBuild
+> service role before the first CI deploy.
+
+### One-time migration to the SAM stack
+
+The original prod functions and API Gateways were created by hand; the SAM stack is a fresh set of
+resources with **new** API URLs, so a one-time cutover is required:
+
+1. Ensure the CodeBuild (or your local) role has the permissions above, then deploy the stack:
+   ```
+   node libs/backend/lambdas/build.mjs
+   sam deploy --config-env prod
+   ```
+2. Read the stack **Outputs** (`YahooEndpoint`, `MicroserviceEndpoint`) — e.g.
+   `sam list stack-outputs --stack-name investments-tracker-prod` — and paste them into
+   `apps/frontend/src/environments/environment.prod.ts` (`yahooLambdaUrl`, `dynamoDBLambdaUrl`).
+3. Rebuild and redeploy the frontend so it points at the new endpoints.
+4. Once verified, delete the **old** hand-made `yahoo_finance` / `microservice` functions and their
+   API Gateways.
+
+> The existing **`Investment_Tracker` DynamoDB table is intentionally not managed by the stack** so
+> a deploy can never replace it with an empty table — the function is only granted access to it.
+> Cognito callback URLs point at the frontend domain (unchanged), so no Cognito changes are needed.
