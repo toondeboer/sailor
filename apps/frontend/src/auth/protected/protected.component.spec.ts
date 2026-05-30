@@ -1,21 +1,20 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { ProtectedComponent } from './protected.component';
 
 describe('ProtectedComponent', () => {
-  let component: ProtectedComponent;
-  let fixture: ComponentFixture<ProtectedComponent>;
-
-  beforeEach(async () => {
+  it('should create', async () => {
     await TestBed.configureTestingModule({
       imports: [ProtectedComponent],
+      providers: [
+        provideRouter([]),
+        { provide: OidcSecurityService, useValue: {} },
+        { provide: 'ENVIRONMENT', useValue: { baseUrl: '' } },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ProtectedComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = TestBed.createComponent(ProtectedComponent);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

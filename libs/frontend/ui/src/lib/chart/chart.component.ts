@@ -13,8 +13,8 @@ export class ChartComponent implements OnChanges {
   @Input() x: Date[] = [];
   @Input() y: number[] = [];
   @Input() label: string | undefined;
-  @Input() money: boolean = true;
-  @Input() showSymbols: boolean = false;
+  @Input() money = true;
+  @Input() showSymbols = false;
 
   chartOptions: EChartsOption | undefined;
 

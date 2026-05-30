@@ -1,21 +1,13 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BarChartPerQuarterByYear } from './bar-chart-per-quarter-by-year';
+import { TestBed } from '@angular/core/testing';
+import { BarChartPerQuarterByYearComponent } from './bar-chart-per-quarter-by-year';
 
-describe('BarChartComponent', () => {
-  let component: BarChartPerQuarterByYear;
-  let fixture: ComponentFixture<BarChartPerQuarterByYear>;
-
-  beforeEach(async () => {
+describe('BarChartPerQuarterByYearComponent', () => {
+  it('should create', async () => {
     await TestBed.configureTestingModule({
-      declarations: [BarChartPerQuarterByYear],
+      imports: [BarChartPerQuarterByYearComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BarChartPerQuarterByYear);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = TestBed.createComponent(BarChartPerQuarterByYearComponent);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

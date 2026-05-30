@@ -6,3 +6,19 @@ globalThis.ngJest = {
   },
 };
 import 'jest-preset-angular/setup-jest';
+
+// jsdom doesn't implement matchMedia, which Angular CDK's MediaMatcher needs
+// (e.g. PageWrapperComponent builds a MediaQueryList on construction).
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    dispatchEvent: () => false,
+  }),
+});

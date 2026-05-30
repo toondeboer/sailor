@@ -1,21 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { TransactionsComponent } from './transactions.component';
 
 describe('TransactionsComponent', () => {
-  let component: TransactionsComponent;
-  let fixture: ComponentFixture<TransactionsComponent>;
-
-  beforeEach(async () => {
+  it('should create', async () => {
     await TestBed.configureTestingModule({
-      declarations: [TransactionsComponent],
+      imports: [TransactionsComponent],
+      providers: [provideMockStore()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TransactionsComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });
