@@ -4,7 +4,7 @@ import { selectYahoo } from '@aws/yahoo';
 import { Store } from '@ngrx/store';
 import { ChartComponent } from '../chart/chart.component';
 import { BarAndLineChartComponent } from '../bar-and-line-chart/bar-and-line-chart.component';
-import { BarChartPerQuarterByYear } from '../bar-chart-per-quarter-by-year/bar-chart-per-quarter-by-year';
+import { BarChartPerQuarterByYearComponent } from '../bar-chart-per-quarter-by-year/bar-chart-per-quarter-by-year';
 import { BarChartComponent } from '../bar-chart/bar-chart.component';
 import { AsyncPipe, CommonModule } from '@angular/common';
 
@@ -15,7 +15,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
   imports: [
     ChartComponent,
     BarAndLineChartComponent,
-    BarChartPerQuarterByYear,
+    BarChartPerQuarterByYearComponent,
     BarChartComponent,
     AsyncPipe,
     CommonModule

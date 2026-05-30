@@ -1,21 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { ScrollingTextComponent } from './scrolling-text.component';
 
 describe('ScrollingTextComponent', () => {
-  let component: ScrollingTextComponent;
-  let fixture: ComponentFixture<ScrollingTextComponent>;
-
-  beforeEach(async () => {
+  it('should create', async () => {
     await TestBed.configureTestingModule({
-      declarations: [ScrollingTextComponent],
+      imports: [ScrollingTextComponent],
+      providers: [provideMockStore()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ScrollingTextComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = TestBed.createComponent(ScrollingTextComponent);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

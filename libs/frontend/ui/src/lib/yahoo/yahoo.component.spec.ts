@@ -1,21 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { YahooComponent } from './yahoo.component';
 
 describe('YahooComponent', () => {
-  let component: YahooComponent;
-  let fixture: ComponentFixture<YahooComponent>;
-
-  beforeEach(async () => {
+  it('should create', async () => {
     await TestBed.configureTestingModule({
-      declarations: [YahooComponent],
+      imports: [YahooComponent],
+      providers: [provideMockStore()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(YahooComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = TestBed.createComponent(YahooComponent);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

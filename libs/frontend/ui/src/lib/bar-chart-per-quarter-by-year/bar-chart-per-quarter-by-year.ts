@@ -21,7 +21,7 @@ const colors = [
     CommonModule
   ]
 })
-export class BarChartPerQuarterByYear implements OnChanges {
+export class BarChartPerQuarterByYearComponent implements OnChanges {
   @Input() series: { year: string; data: number[] }[] = [];
 
   chartOptions: EChartsOption | undefined;

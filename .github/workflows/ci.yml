@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+# Cancel superseded runs on the same ref (e.g. new pushes to a PR).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so `nx affected` can diff against the base branch.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Sets NX_BASE / NX_HEAD for `nx affected` (merge-base on PRs,
+      # last successful commit on push to main).
+      - uses: nrwl/nx-set-shas@v4
+
+      - name: Lint, test and build affected projects
+        run: npx nx affected -t lint test build --parallel=3
