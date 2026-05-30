@@ -1,8 +1,14 @@
+// TODO(cutover): the SAM stack (investments-tracker-prod) creates a NEW API
+// Gateway, so both URLs below must be repointed before this is deployed.
+// After `sam deploy --config-env prod`, get the new id from the stack outputs:
+//   sam list stack-outputs --stack-name investments-tracker-prod --region us-east-1
+// and replace REPLACE_WITH_API_ID below (both endpoints share the one API Gateway,
+// stage `prod`). DO NOT merge with the placeholder in place.
 export const environment = {
   production: true,
   baseUrl: 'https://investments-tracker.toondeboer.com',
   yahooLambdaUrl:
-    'https://42zobgj5c7.execute-api.us-east-1.amazonaws.com/default/yahoo_finance',
+    'https://REPLACE_WITH_API_ID.execute-api.us-east-1.amazonaws.com/prod/yahoo_finance',
   dynamoDBLambdaUrl:
-    'https://jkp05h7nyi.execute-api.us-east-1.amazonaws.com/prod/microservice',
+    'https://REPLACE_WITH_API_ID.execute-api.us-east-1.amazonaws.com/prod/microservice',
 };
