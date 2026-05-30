@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { BarChartPerQuarterByYearComponent } from './bar-chart-per-quarter-by-year';
+import { BarChartPerQuarterByYearComponent } from './bar-chart-per-quarter-by-year.component';
 
 describe('BarChartPerQuarterByYearComponent', () => {
   it('should create', async () => {

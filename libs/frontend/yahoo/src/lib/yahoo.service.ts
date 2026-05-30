@@ -19,7 +19,6 @@ export class YahooService {
   ) {}
 
   public getTicker(name: string, startDate: Date): Observable<YahooObject> {
-    console.log('AWS LAMBDA CALL');
     const start = Math.floor(startDate.getTime() / 1000);
     const end = Math.ceil(new Date().getTime() / 1000);
     const body = {
@@ -35,10 +34,6 @@ export class YahooService {
     startDate: Date,
     currencies: string[]
   ): Observable<YahooObject[]> {
-    console.log('AWS LAMBDA CALL MULTIPLE TICKERS: ', [
-      ...names,
-      ...currencies,
-    ]);
     const start = Math.floor(startDate.getTime() / 1000);
     const end = Math.ceil(new Date().getTime() / 1000);
     const body = {

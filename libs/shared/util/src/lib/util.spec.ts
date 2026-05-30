@@ -30,10 +30,6 @@ import {
   yahooObjectToTicker,
 } from './util';
 
-// Silence the (chatty) diagnostic logging in util.ts so the test output stays readable.
-beforeAll(() => jest.spyOn(console, 'log').mockImplementation(() => undefined));
-afterAll(() => jest.restoreAllMocks());
-
 // --- helpers ---------------------------------------------------------------
 
 function tx(

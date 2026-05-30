@@ -72,8 +72,6 @@
         <div
           class="feature-card"
           *ngFor="let feature of features; trackBy: trackByFeature"
-          (mouseenter)="onFeatureHover(feature)"
-          (mouseleave)="onFeatureLeave(feature)"
         >
           <div class="feature-icon" [innerHTML]="feature.icon"></div>
           <h3>{{ feature.title }}</h3>

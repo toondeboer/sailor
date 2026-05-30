@@ -19,7 +19,6 @@ export class StateService {
   ) {}
 
   public getData(): Observable<DatabaseDto> {
-    console.log('AWS LAMBDA CALL - Database - get data');
     return this.http.get<unknown>(`${this.environment.dynamoDBLambdaUrl}`).pipe(
       timeout(DYNAMODB_TIMEOUT_MS),
       retryWithBackoff(),
@@ -28,8 +27,6 @@ export class StateService {
   }
 
   public setTransactions(transactions: Transactions): Observable<DatabaseDto> {
-    console.log('AWS LAMBDA CALL - Database - set data');
-    console.log(transactions);
     return this.http
       .put<unknown>(`${this.environment.dynamoDBLambdaUrl}`, { transactions })
       .pipe(

@@ -22,9 +22,6 @@ export class BarAndLineChartComponent implements OnChanges {
   chartOptions: EChartsOption | undefined;
 
   ngOnChanges() {
-    if (this.series.yearQuarters.length !== this.series.dividends.length) {
-      console.log(`WARNING: X and Y are not the same size.`);
-    }
     this.chartOptions = this.getChartOptions();
   }
 

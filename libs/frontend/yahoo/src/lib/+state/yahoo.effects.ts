@@ -4,20 +4,9 @@ import { Store } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { switchMap, catchError, of, withLatestFrom, mergeMap } from 'rxjs';
 import { YahooService } from '../yahoo.service';
-import {
-  getTicker,
-  getTickerFailure,
-  getTickersSuccess,
-} from './yahoo.actions';
+import { getTickerFailure, getTickersSuccess } from './yahoo.actions';
 import { yahooObjectsToTickers } from '@aws/util';
-import {
-  deleteTransactionSuccess,
-  getDataSuccess,
-  saveTransactionSuccess,
-  selectState,
-  setChartData,
-} from '@aws/state';
-import { selectYahoo } from './yahoo.selectors';
+import { getDataSuccess, selectState, setChartData } from '@aws/state';
 
 @Injectable()
 export class YahooEffects {
@@ -27,6 +16,10 @@ export class YahooEffects {
     private readonly service: YahooService
   ) {}
 
+  // On a fresh data load, fetch the latest prices for the held tickers and feed
+  // them into the store. Save/delete/import don't refetch prices — the memoized
+  // portfolio selector recomputes from the changed transactions using the
+  // tickers already in the store.
   public readonly getTicker$ = createEffect(() =>
     this.actions$.pipe(
       ofType(getDataSuccess),
@@ -37,30 +30,12 @@ export class YahooEffects {
           .pipe(
             mergeMap((yahooObjects) => {
               const tickers = yahooObjectsToTickers(yahooObjects);
-              console.log('Tickers', tickers);
-              return [
-                getTickersSuccess({ tickers }),
-                setChartData({ tickers }),
-              ];
+              return [getTickersSuccess({ tickers }), setChartData({ tickers })];
             }),
             catchError((error: HttpErrorResponse) =>
               of(getTickerFailure({ error: error.message }))
             )
           );
-      })
-    )
-  );
-
-  public readonly setChartData$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(getDataSuccess, saveTransactionSuccess, deleteTransactionSuccess),
-      withLatestFrom(this.store.select(selectYahoo)),
-      switchMap(([_, { tickers }]) => {
-        if (Object.keys(tickers).length > 0) {
-          return [setChartData({ tickers })];
-        } else {
-          return [];
-        }
       })
     )
   );

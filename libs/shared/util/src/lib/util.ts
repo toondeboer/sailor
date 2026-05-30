@@ -202,7 +202,6 @@ export function sortTransactions(transactions: Transaction[]): Transaction[] {
 export function yahooObjectsToTickers(yahooObjects: YahooObject[]): {
   [ticker: string]: Ticker;
 } {
-  console.log('Results from Yahoo: ', yahooObjects);
   return yahooObjects.reduce((acc, yahooObject) => {
     acc[yahooObject.symbol] = yahooObjectToTicker(yahooObject);
     return acc;
@@ -436,10 +435,6 @@ export function getPortfolioValues(
   aggregatedAmounts: number[],
   ticker: Ticker
 ): number[] {
-  if (dates.length !== aggregatedAmounts.length) {
-    console.log(`WARNING: Arrays are not of the same length.`);
-  }
-
   const values: number[] = [];
   let index = 0;
   let currentDate: Date = ticker.dates[index];
@@ -605,11 +600,6 @@ export function addLists(
   list2: number[],
   nanAsZero = false
 ): number[] {
-  if (list1.length !== list2.length) {
-    console.log(
-      `WARNING: Lists are not the same size. (${list1.length}) - (${list2.length})`
-    );
-  }
   const result = [];
   for (let i = 0; i < list1.length; i++) {
     if (nanAsZero && Number.isNaN(list1[i]) !== Number.isNaN(list2[i])) {
@@ -625,11 +615,6 @@ export function addLists(
 }
 
 export function subtractLists(list1: number[], list2: number[]): number[] {
-  if (list1.length !== list2.length) {
-    console.log(
-      `WARNING: Lists are not the same size. (${list1.length}) - (${list2.length})`
-    );
-  }
   const result = [];
   for (let i = 0; i < list1.length; i++) {
     result.push(list1[i] - list2[i]);
@@ -641,20 +626,8 @@ export function addPerQuarterByYearLists(
   list1: { year: string; data: number[] }[],
   list2: { year: string; data: number[] }[]
 ): { year: string; data: number[] }[] {
-  if (list1.length !== list2.length) {
-    console.log(
-      `WARNING: Lists are not the same size. (${list1.length}) - (${list2.length})`
-    );
-    console.log(list1);
-    console.log(list2);
-  }
   const result = [];
   for (let i = 0; i < list1.length; i++) {
-    if (list1[i].year !== list2[i].year) {
-      console.log(
-        `WARNING: years are not equal. (${list1[i].year}) - (${list2[i].year})`
-      );
-    }
     result.push({
       year: list1[i].year,
       data: addLists(list1[i].data, list2[i].data),
@@ -750,8 +723,6 @@ export function updateDividends(
     perQuarter: dividendPerQuarter,
     ttmPerQuarter: dividendTtmPerQuarter,
   };
-  console.log('OLD, ', dividend);
-  console.log('NEW', result);
   return result;
 }
 
@@ -760,11 +731,6 @@ function getAmountOfSharesForDate(
   dates: Date[],
   date: Date
 ): number {
-  if (amountOfShares.length !== dates.length) {
-    console.log(
-      `WARNING: Lists are not the same size. (${amountOfShares.length}) - (${dates.length})`
-    );
-  }
   const targetYear = date.getFullYear();
   const targetMonth = date.getMonth();
   const targetDay = date.getDate();
@@ -780,16 +746,12 @@ function getAmountOfSharesForDate(
     }
   }
 
-  // If no match found
-  console.log(`No matching date found for ${date}`);
   return 0;
 }
 
 export function getCurrencies(stocks: { [ticker: string]: Stock }): string[] {
-  console.log(stocks);
   const currencies: string[] = [];
   for (const key of Object.keys(stocks)) {
-    console.log(stocks[key]);
     const currency = stocks[key].currency.yahooTicker;
     if (currency && !currencies.includes(currency)) {
       currencies.push(currency);

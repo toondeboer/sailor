@@ -38,7 +38,6 @@ export class ActiveTickersComponent implements OnChanges {
     } else {
       this.activeStocks = this.activeStocks.filter((v) => v !== value);
     }
-    console.log('Active tickers: ', this.activeStocks);
     this.activeChartData = this.getActiveChartData();
   }
 

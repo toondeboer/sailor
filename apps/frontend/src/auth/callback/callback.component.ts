@@ -25,8 +25,6 @@ export class CallbackComponent implements OnInit {
       } else {
         this.router.navigate(['/login']);
       }
-
-      console.warn('authenticated: ', isAuthenticated);
     });
   }
 }
