@@ -67,3 +67,11 @@
     left: 100%;
   }
 }
+
+// Error toast (MatSnackBar panelClass: 'error-snackbar'). Rendered in the CDK
+// overlay, so it must be styled globally rather than in a component stylesheet.
+.error-snackbar {
+  --mdc-snackbar-container-color: #b00020;
+  --mdc-snackbar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: #fff;
+}
