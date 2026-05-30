@@ -1,46 +1,95 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  yahoo
+  Investments Tracker backend — Yahoo Finance + DynamoDB Lambdas behind a single
+  API Gateway. Managed as code (CloudFormation/SAM); deploy with `sam deploy`.
 
-  Sample SAM Template for yahoo
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+    Description: API Gateway stage name; also drives the DynamoDB Lambda's ENVIRONMENT.
+  AllowedOrigins:
+    Type: String
+    Default: http://localhost:4200
+    Description: Comma-separated CORS allowlist (the Lambdas reflect a matching Origin).
+  CognitoUserPoolId:
+    Type: String
+    Default: us-east-1_liCB4LgDE
+  CognitoClientId:
+    Type: String
+    Default: 3o34bbl92faeo9ljo11eebtim2
+  TableName:
+    Type: String
+    Default: Investment_Tracker
+    Description: >
+      Existing DynamoDB table (holds user data). Intentionally NOT created by this
+      stack so a fresh deploy can't replace it with an empty table — the function is
+      only granted access to it.
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures: [x86_64]
+    # Yahoo fetches and the Cognito JWKS lookup can exceed the 3s default.
+    Timeout: 30
+    MemorySize: 256
 
 Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+
   YahooFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: libs/backend/lambdas/src/yahoo/
+      # Pre-bundled by esbuild (libs/backend/lambdas/build.mjs) into a single
+      # self-contained file; @aws-sdk is left external (provided by the runtime).
+      CodeUri: dist/lambdas/yahoo/
       Handler: index.handler
-      Runtime: nodejs22.x
-      Architectures:
-        - x86_64
+      Environment:
+        Variables:
+          ALLOWED_ORIGINS: !Ref AllowedOrigins
       Events:
         YahooFinance:
           Type: Api
           Properties:
+            RestApiId: !Ref Api
             Path: /yahoo_finance
-            Method: post
-      Environment:
-        Variables:
-          ALLOWED_ORIGINS: http://localhost:4200,https://investments-tracker.toondeboer.com
+            # ANY so the Lambda also answers the CORS preflight (OPTIONS).
+            Method: any
 
   DynamoDBFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: libs/backend/lambdas/src/dynamodb/
+      CodeUri: dist/lambdas/dynamodb/
       Handler: index.handler
-      Runtime: nodejs22.x
-      Architectures:
-        - x86_64
-      Events:
-        DynamoDB:
-          Type: Api
-          Properties:
-            Path: /microservice
-            Method: any
       Environment:
         Variables:
-          ENVIRONMENT: dev
-          ALLOWED_ORIGINS: http://localhost:4200,https://investments-tracker.toondeboer.com
-          COGNITO_USER_POOL_ID: us-east-1_liCB4LgDE
-          COGNITO_CLIENT_ID: 3o34bbl92faeo9ljo11eebtim2
+          ENVIRONMENT: !Ref Stage
+          ALLOWED_ORIGINS: !Ref AllowedOrigins
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_CLIENT_ID: !Ref CognitoClientId
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+      Events:
+        Microservice:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /microservice
+            Method: any
+
+Outputs:
+  ApiBaseUrl:
+    Description: Base URL of the deployed API stage.
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Stage}'
+  YahooEndpoint:
+    Description: Copy into environment.prod.ts -> yahooLambdaUrl
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/yahoo_finance'
+  MicroserviceEndpoint:
+    Description: Copy into environment.prod.ts -> dynamoDBLambdaUrl
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/microservice'
