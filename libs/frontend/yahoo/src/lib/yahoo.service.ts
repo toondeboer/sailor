@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
-import { parseYahooObjects, Stock, YahooObject } from '@aws/util';
+import { map, Observable, timeout } from 'rxjs';
+import {
+  parseYahooObjects,
+  retryWithBackoff,
+  Stock,
+  YahooObject,
+  YAHOO_TIMEOUT_MS,
+} from '@aws/util';
 
 @Injectable({
   providedIn: 'root',
@@ -40,8 +46,10 @@ export class YahooService {
       start: start,
       end: end,
     };
-    return this.http
-      .post<unknown>(this.environment.yahooLambdaUrl, body)
-      .pipe(map((response) => parseYahooObjects(response)));
+    return this.http.post<unknown>(this.environment.yahooLambdaUrl, body).pipe(
+      timeout(YAHOO_TIMEOUT_MS),
+      retryWithBackoff(),
+      map((response) => parseYahooObjects(response))
+    );
   }
 }

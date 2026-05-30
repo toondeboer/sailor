@@ -66,6 +66,8 @@ export const handler = async (event) => {
         hostname: 'query1.finance.yahoo.com',
         path: apiUrl,
         method: 'GET',
+        // Don't let a hung connection pin the Lambda until its overall timeout.
+        timeout: 10000,
         headers: {
           Accept: '*/*',
           'User-Agent':
@@ -94,6 +96,10 @@ export const handler = async (event) => {
               reject(new Error(`Failed to parse Yahoo response for ${symbol}`));
             }
           });
+        });
+
+        req.on('timeout', () => {
+          req.destroy(new Error(`Yahoo request timed out for ${symbol}`));
         });
 
         req.on('error', (error) => {

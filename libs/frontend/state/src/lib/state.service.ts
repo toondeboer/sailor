@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { DatabaseDto, parseDatabaseDto, Transactions } from '@aws/util';
-import { map, Observable } from 'rxjs';
+import {
+  DatabaseDto,
+  DYNAMODB_TIMEOUT_MS,
+  parseDatabaseDto,
+  retryWithBackoff,
+  Transactions,
+} from '@aws/util';
+import { map, Observable, timeout } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -14,9 +20,11 @@ export class StateService {
 
   public getData(): Observable<DatabaseDto> {
     console.log('AWS LAMBDA CALL - Database - get data');
-    return this.http
-      .get<unknown>(`${this.environment.dynamoDBLambdaUrl}`)
-      .pipe(map((response) => parseDatabaseDto(response)));
+    return this.http.get<unknown>(`${this.environment.dynamoDBLambdaUrl}`).pipe(
+      timeout(DYNAMODB_TIMEOUT_MS),
+      retryWithBackoff(),
+      map((response) => parseDatabaseDto(response))
+    );
   }
 
   public setTransactions(transactions: Transactions): Observable<DatabaseDto> {
@@ -24,6 +32,12 @@ export class StateService {
     console.log(transactions);
     return this.http
       .put<unknown>(`${this.environment.dynamoDBLambdaUrl}`, { transactions })
-      .pipe(map((response) => parseDatabaseDto(response)));
+      .pipe(
+        timeout(DYNAMODB_TIMEOUT_MS),
+        // The PUT is an idempotent "set transactions = ...", so retrying a
+        // transient failure can't double-write.
+        retryWithBackoff(),
+        map((response) => parseDatabaseDto(response))
+      );
   }
 }
