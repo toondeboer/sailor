@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { switchMap, catchError, of, map, tap } from 'rxjs';
+import { switchMap, catchError, of, map, tap, withLatestFrom } from 'rxjs';
 import {
   deleteAllTransactions,
   deleteAllTransactionsFailure,
@@ -13,6 +13,7 @@ import {
   deleteTransactionFailure,
   deleteTransactionSuccess,
   getData,
+  getDataCached,
   getDataFailure,
   getDataSuccess,
   handleFileInput,
@@ -22,7 +23,13 @@ import {
   saveTransactionFailure,
   saveTransactionSuccess,
 } from './state.actions';
+import { selectLastFetched } from './state.selectors';
 import { Transactions, parseCsvInput, translateToDutch } from '@aws/util';
+
+// How long a successful transactions fetch stays "fresh"; within this window a
+// repeat getData (e.g. navigating back to a route that loads data) is served
+// from the store instead of re-hitting DynamoDB.
+const GET_DATA_CACHE_MS = 30_000;
 
 @Injectable()
 export class StateEffects {
@@ -58,12 +65,18 @@ export class StateEffects {
   public readonly getData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(getData),
-      switchMap(() => {
+      withLatestFrom(this.store.select(selectLastFetched)),
+      switchMap(([, lastFetched]) => {
+        // Serve from cache while still fresh (avoids re-fetching on every
+        // route visit that triggers getData).
+        if (
+          lastFetched !== null &&
+          Date.now() - lastFetched < GET_DATA_CACHE_MS
+        ) {
+          return of(getDataCached());
+        }
         return this.service.getData().pipe(
-          map(({ transactions }) => {
-            console.log('transactions', transactions);
-            return getDataSuccess({ data: transactions });
-          }),
+          map(({ transactions }) => getDataSuccess({ data: transactions })),
           catchError((error: HttpErrorResponse) =>
             of(getDataFailure({ error: error.message }))
           )

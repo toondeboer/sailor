@@ -16,6 +16,8 @@ export const getDataFailure = createAction(
   '[State] Get Data Failure',
   props<{ error: string }>()
 );
+// Dispatched instead of re-fetching when cached data is still fresh (see P3).
+export const getDataCached = createAction('[State] Get Data Cached');
 
 export const saveTransaction = createAction(
   '[State] Save Transaction',

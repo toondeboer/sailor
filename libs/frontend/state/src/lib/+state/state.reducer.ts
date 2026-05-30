@@ -7,6 +7,7 @@ import {
   deleteTransactionFailure,
   deleteTransactionSuccess,
   getData,
+  getDataCached,
   getDataFailure,
   getDataSuccess,
   handleFileInput,
@@ -31,6 +32,8 @@ export interface FeatureState {
   tickers: { [ticker: string]: Ticker };
   loading: boolean;
   error: string | null;
+  // Epoch ms of the last successful transactions fetch; drives the getData cache.
+  lastFetched: number | null;
 }
 
 export const initialState: FeatureState = {
@@ -38,6 +41,7 @@ export const initialState: FeatureState = {
   tickers: {},
   loading: false,
   error: null,
+  lastFetched: null,
 };
 
 export const reducer = createReducer(
@@ -69,8 +73,11 @@ export const reducer = createReducer(
     deleteTransactionSuccess,
     deleteAllTransactionsSuccess,
     handleFileInputSuccess,
-    (state) => ({ ...state, loading: false })
+    (state) => ({ ...state, loading: false, lastFetched: Date.now() })
   ),
+  // Cache hit: clear loading without touching data (and without re-triggering
+  // the Yahoo fetch, which keys off getDataSuccess).
+  on(getDataCached, (state) => ({ ...state, loading: false })),
   on(
     getDataFailure,
     saveTransactionFailure,

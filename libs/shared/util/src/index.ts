@@ -3,3 +3,4 @@ export * from './lib/util';
 export * from './lib/types';
 export * from './lib/portfolio';
 export * from './lib/schemas';
+export * from './lib/http-resilience';

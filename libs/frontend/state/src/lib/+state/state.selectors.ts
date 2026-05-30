@@ -24,6 +24,11 @@ export const selectError = createSelector(
   (state: FeatureState) => state.error
 );
 
+export const selectLastFetched = createSelector(
+  selectFeature,
+  (state: FeatureState) => state.lastFetched
+);
+
 // Heavy portfolio derivation. Memoized by NgRx: it recomputes only when the raw
 // transactions or tickers change — NOT on every action or on loading/error
 // toggles. This is the work that previously ran in the reducer on every action.
