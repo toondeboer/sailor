@@ -8,7 +8,7 @@ export const environment = {
   production: true,
   baseUrl: 'https://investments-tracker.toondeboer.com',
   yahooLambdaUrl:
-    'https://REPLACE_WITH_API_ID.execute-api.us-east-1.amazonaws.com/prod/yahoo_finance',
+    'https://jx9de60m0g.execute-api.us-east-1.amazonaws.com/prod/yahoo_finance',
   dynamoDBLambdaUrl:
-    'https://REPLACE_WITH_API_ID.execute-api.us-east-1.amazonaws.com/prod/microservice',
+    'https://jx9de60m0g.execute-api.us-east-1.amazonaws.com/prod/microservice',
 };
