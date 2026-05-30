@@ -1,9 +1,10 @@
 import { StateService } from './../state.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { switchMap, catchError, of, map } from 'rxjs';
+import { switchMap, catchError, of, map, tap } from 'rxjs';
 import {
   deleteAllTransactions,
   deleteAllTransactionsFailure,
@@ -28,8 +29,31 @@ export class StateEffects {
   constructor(
     private store: Store,
     private readonly actions$: Actions,
-    private readonly service: StateService
+    private readonly service: StateService,
+    private readonly snackBar: MatSnackBar
   ) {}
+
+  // Surface any failure to the user as a dismissible toast. Without this, the
+  // *Failure actions are dispatched but never shown — a save could fail silently.
+  public readonly showError$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(
+          getDataFailure,
+          saveTransactionFailure,
+          deleteTransactionFailure,
+          deleteAllTransactionsFailure,
+          handleFileInputFailure
+        ),
+        tap(({ error }) =>
+          this.snackBar.open(error || 'Something went wrong', 'Dismiss', {
+            duration: 6000,
+            panelClass: 'error-snackbar',
+          })
+        )
+      ),
+    { dispatch: false }
+  );
 
   public readonly getData$ = createEffect(() =>
     this.actions$.pipe(

@@ -7,3 +7,13 @@ export const selectState = createSelector(
   selectFeature,
   (state: FeatureState) => state
 );
+
+export const selectLoading = createSelector(
+  selectFeature,
+  (state: FeatureState) => state.loading
+);
+
+export const selectError = createSelector(
+  selectFeature,
+  (state: FeatureState) => state.error
+);

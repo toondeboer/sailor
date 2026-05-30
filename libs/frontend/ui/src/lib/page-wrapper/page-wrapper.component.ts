@@ -13,12 +13,13 @@ import {
   MatSidenavContent,
 } from '@angular/material/sidenav';
 import { Store } from '@ngrx/store';
-import { getData } from '@aws/state';
+import { getData, selectLoading } from '@aws/state';
 import { ScrollingTextComponent } from '../scrolling-text/scrolling-text.component';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatListItem, MatNavList } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'aws-page-wrapper',
@@ -35,9 +36,11 @@ import { MatButton } from '@angular/material/button';
     CommonModule,
     MatButton,
     MatListItem,
+    MatProgressBar,
   ],
 })
 export class PageWrapperComponent implements OnInit, OnDestroy {
+  loading$ = this.store.select(selectLoading);
   mobileQuery: MediaQueryList;
   navigationOptions = [
     {

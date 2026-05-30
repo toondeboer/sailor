@@ -1,9 +1,19 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import {
+  deleteAllTransactions,
+  deleteAllTransactionsFailure,
   deleteAllTransactionsSuccess,
+  deleteTransaction,
+  deleteTransactionFailure,
   deleteTransactionSuccess,
+  getData,
+  getDataFailure,
   getDataSuccess,
+  handleFileInput,
+  handleFileInputFailure,
   handleFileInputSuccess,
+  saveTransaction,
+  saveTransactionFailure,
   saveTransactionSuccess,
   setChartData,
 } from './state.actions';
@@ -37,6 +47,8 @@ export interface FeatureState {
   dates: Date[];
   summary: Summary;
   currencies: string[];
+  loading: boolean;
+  error: string | null;
 }
 
 export const initialState: FeatureState = {
@@ -71,6 +83,8 @@ export const initialState: FeatureState = {
     },
   },
   currencies: [],
+  loading: false,
+  error: null,
 };
 
 export const reducer = createReducer(
@@ -317,7 +331,33 @@ export const reducer = createReducer(
         totalDividend: totalDividendSummary,
       },
     };
-  })
+  }),
+  // --- request / success / failure status tracking ---
+  // Composed alongside the data handlers above (NgRx runs every matching `on`).
+  on(
+    getData,
+    saveTransaction,
+    deleteTransaction,
+    deleteAllTransactions,
+    handleFileInput,
+    (state) => ({ ...state, loading: true, error: null })
+  ),
+  on(
+    getDataSuccess,
+    saveTransactionSuccess,
+    deleteTransactionSuccess,
+    deleteAllTransactionsSuccess,
+    handleFileInputSuccess,
+    (state) => ({ ...state, loading: false })
+  ),
+  on(
+    getDataFailure,
+    saveTransactionFailure,
+    deleteTransactionFailure,
+    deleteAllTransactionsFailure,
+    handleFileInputFailure,
+    (state, { error }) => ({ ...state, loading: false, error })
+  )
 );
 
 export const feature = createFeature({ name: featureKey, reducer });

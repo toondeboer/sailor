@@ -4,6 +4,12 @@
     <aws-scrolling-text></aws-scrolling-text>
   </mat-toolbar>
 
+  <mat-progress-bar
+    *ngIf="loading$ | async"
+    mode="indeterminate"
+    color="accent"
+  ></mat-progress-bar>
+
   <mat-sidenav-container
     class="example-sidenav-container"
     [style.marginTop.px]="mobileQuery.matches ? 56 : 0"
