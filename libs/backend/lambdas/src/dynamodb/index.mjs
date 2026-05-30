@@ -70,13 +70,30 @@ if (currentEnv === 'dev') {
   dynamoDB = DynamoDBDocument.from(new DynamoDB());
 }
 
-const headers = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin':
-    process.env.ALLOWED_ORIGIN || 'http://localhost:4200',
-  'Access-Control-Allow-Methods': 'OPTIONS,GET,PUT,POST,DELETE',
-  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-};
+// Comma-separated allowlist of origins permitted to call this API. A single
+// Access-Control-Allow-Origin can only name one origin, so we reflect the
+// caller's Origin when it is on the list (supporting local dev + prod at once).
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS ||
+  'http://localhost:4200,https://investments-tracker.toondeboer.com'
+)
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+function buildHeaders(event) {
+  const requestOrigin = event.headers?.origin || event.headers?.Origin || '';
+  const allowOrigin = allowedOrigins.includes(requestOrigin)
+    ? requestOrigin
+    : allowedOrigins[0];
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'OPTIONS,GET,PUT,POST,DELETE',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    Vary: 'Origin',
+  };
+}
 
 const tableName = 'Investment_Tracker';
 
@@ -92,6 +109,14 @@ const tableName = 'Investment_Tracker';
  */
 export const handler = async (event) => {
   console.log('Received event', event);
+
+  const headers = buildHeaders(event);
+
+  // Answer the CORS preflight before auth: browsers omit the Authorization
+  // header on OPTIONS, so gating it behind auth would 401 every preflight.
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, body: '', headers };
+  }
 
   let body;
   let statusCode = '200';
@@ -149,8 +174,6 @@ export const handler = async (event) => {
             ReturnValues: 'ALL_NEW',
           })
         ).Attributes.transactions;
-        break;
-      case 'OPTIONS':
         break;
       default:
         throw new Error(`Unsupported method "${event.httpMethod}"`);

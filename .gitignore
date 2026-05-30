@@ -5,6 +5,10 @@ dist
 tmp
 /out-tsc
 
+# lambda deployment bundles (created by buildspec)
+yahoo.zip
+dynamodb.zip
+
 # dependencies
 node_modules
 

@@ -1,0 +1,32 @@
+// Reusable style mixins built on the design tokens. Consume with
+// `@use 'mixins' as *;` (resolved via stylePreprocessorOptions.includePaths).
+@use 'tokens' as *;
+
+// Frosted-glass surface used by the header, hero panel and overlays.
+@mixin glass-panel($bg: $glass-bg, $blur: 20px) {
+  background: $bg;
+  backdrop-filter: blur($blur);
+  border: 1px solid $glass-border;
+}
+
+// Clip a gradient to text (the hero title effect).
+@mixin gradient-text($gradient) {
+  background: $gradient;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// Max-width media query helper: `@include respond-to($bp-md) { ... }`.
+@mixin respond-to($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
+
+// Centered flex container.
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

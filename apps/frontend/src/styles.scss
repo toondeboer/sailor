@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
+@use './styles/tokens' as *;
+@use './styles/globals';
 
 @include mat.core();
 
@@ -73,12 +75,12 @@ html,
 body {
   max-width: 100%;
   overflow-x: hidden;
-  background-color: rgb(243, 239, 232);
+  background-color: $page-bg;
   margin: 0;
 }
 
 mat-sidenav-content {
-  background-color: rgb(243, 239, 232);
+  background-color: $page-bg;
 }
 
 .grid {

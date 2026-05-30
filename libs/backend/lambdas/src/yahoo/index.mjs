@@ -1,13 +1,32 @@
 import https from 'https';
 
-export const handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin':
-      process.env.ALLOWED_ORIGIN || 'http://localhost:4200',
+// Comma-separated allowlist of origins permitted to call this API. A single
+// Access-Control-Allow-Origin can only name one origin, so we reflect the
+// caller's Origin when it is on the list (supporting local dev + prod at once).
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS ||
+  'http://localhost:4200,https://investments-tracker.toondeboer.com'
+)
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+function buildHeaders(event) {
+  const requestOrigin = event.headers?.origin || event.headers?.Origin || '';
+  const allowOrigin = allowedOrigins.includes(requestOrigin)
+    ? requestOrigin
+    : allowedOrigins[0];
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type,Authorization',
     'Content-Type': 'application/json',
+    Vary: 'Origin',
   };
+}
+
+export const handler = async (event) => {
+  const headers = buildHeaders(event);
 
   if (event.httpMethod === 'OPTIONS') {
     return {

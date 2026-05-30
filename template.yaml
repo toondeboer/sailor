@@ -22,7 +22,7 @@ Resources:
             Method: post
       Environment:
         Variables:
-          ALLOWED_ORIGIN: http://localhost:4200
+          ALLOWED_ORIGINS: http://localhost:4200,https://investments-tracker.toondeboer.com
 
   DynamoDBFunction:
     Type: AWS::Serverless::Function
@@ -41,6 +41,6 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: dev
-          ALLOWED_ORIGIN: http://localhost:4200
+          ALLOWED_ORIGINS: http://localhost:4200,https://investments-tracker.toondeboer.com
           COGNITO_USER_POOL_ID: us-east-1_liCB4LgDE
           COGNITO_CLIENT_ID: 3o34bbl92faeo9ljo11eebtim2

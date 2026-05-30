@@ -9,25 +9,24 @@ phases:
       - yarn global add nx
   pre_build:
     commands:
-      - echo Installing frontend dependencies...
+      - echo Installing dependencies...
+      # Root install covers the Lambda packages too (they are workspace members),
+      # so their deps (jsonwebtoken, jwks-rsa, ...) land in the root node_modules
+      # where the bundler resolves them.
       - yarn install
-      - echo Installing dependencies for lambda functions dynamodb...
-      - cd libs/backend/lambdas/src/dynamodb
-      - yarn install
-      - cd ../../../../..
       - echo Installing dependencies completed
   build:
     commands:
       - echo Building frontend...
       - nx build frontend
+      - echo Bundling Lambda functions...
+      # esbuild bundles each handler + its deps into a single self-contained
+      # file under dist/lambdas/<name>/index.mjs (see libs/backend/lambdas/build.mjs).
+      - node libs/backend/lambdas/build.mjs
       - echo Packaging Lambda function yahoo...
-      - cd libs/backend/lambdas/src/yahoo
-      - zip -r ../../../../../yahoo.zip index.mjs
-      - cd ../../../../..
+      - cd dist/lambdas/yahoo && zip -r ../../../yahoo.zip index.mjs && cd ../../..
       - echo Packaging Lambda function dynamo db...
-      - cd libs/backend/lambdas/src/dynamodb
-      - zip -r ../../../../../dynamodb.zip index.mjs node_modules
-      - cd ../../../../..
+      - cd dist/lambdas/dynamodb && zip -r ../../../dynamodb.zip index.mjs && cd ../../..
       - echo Build completed on `date`
   post_build:
     commands:

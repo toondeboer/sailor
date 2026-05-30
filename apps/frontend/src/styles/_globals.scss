@@ -1,0 +1,69 @@
+// App-wide reusable classes and keyframes. Emitted into the global stylesheet
+// (imported from styles.scss) so any component template can use them directly.
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+// Reusable button system (primary / secondary / large).
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: $radius-sm;
+  text-decoration: none;
+  font-weight: 600;
+  transition: $transition-base;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+  }
+
+  &.btn-primary {
+    background: $accent-gradient;
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    }
+  }
+
+  &.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// Utility: clip the brand gradient onto text.
+.gradient-text {
+  @include gradient-text(linear-gradient(45deg, #fff, #f0f0f0));
+}
+
+// Shared animations.
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
