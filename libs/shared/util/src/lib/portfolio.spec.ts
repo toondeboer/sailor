@@ -2,10 +2,6 @@ import { Ticker, TransactionsDbo } from './types';
 import { getDailyDates, getStartDate, transactionsDboToStocks } from './util';
 import { computePortfolioState } from './portfolio';
 
-// Silence util.ts diagnostic logging so the output stays readable.
-beforeAll(() => jest.spyOn(console, 'log').mockImplementation(() => undefined));
-afterAll(() => jest.restoreAllMocks());
-
 describe('computePortfolioState', () => {
   const dbo: TransactionsDbo = {
     stock: [

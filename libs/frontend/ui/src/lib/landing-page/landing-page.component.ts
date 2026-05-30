@@ -145,14 +145,6 @@ export class LandingPageComponent implements OnInit, OnDestroy {
     return step.number;
   }
 
-  onFeatureHover(feature: Feature) {
-    // Add any hover logic here
-  }
-
-  onFeatureLeave(feature: Feature) {
-    // Add any hover leave logic here
-  }
-
   // Make sure to close mobile menu on component destroy
   ngOnDestroy(): void {
     document.body.style.overflow = '';

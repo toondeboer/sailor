@@ -19,11 +19,6 @@ export class ChartComponent implements OnChanges {
   chartOptions: EChartsOption | undefined;
 
   ngOnChanges() {
-    if (this.x.length !== this.y.length) {
-      console.log(
-        `WARNING: X and Y are not the same size. (${this.x.length}) - (${this.y.length})`
-      );
-    }
     this.chartOptions = this.getChartOptions();
   }
 

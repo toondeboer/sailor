@@ -14,8 +14,8 @@ const colors = [
 
 @Component({
   selector: 'aws-bar-chart-per-quarter-by-year',
-  templateUrl: './bar-chart-per-quarter-by-year.html',
-  styleUrls: ['./bar-chart-per-quarter-by-year.scss'],
+  templateUrl: './bar-chart-per-quarter-by-year.component.html',
+  styleUrls: ['./bar-chart-per-quarter-by-year.component.scss'],
   imports: [
     NgxEchartsDirective,
     CommonModule

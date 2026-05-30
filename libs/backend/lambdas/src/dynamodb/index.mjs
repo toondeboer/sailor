@@ -108,8 +108,7 @@ const tableName = 'Investment_Tracker';
  * DynamoDB API as a JSON body.
  */
 export const handler = async (event) => {
-  console.log('Received event', event);
-
+  // NB: never log the full event — event.headers.Authorization is the user's JWT.
   const headers = buildHeaders(event);
 
   // Answer the CORS preflight before auth: browsers omit the Authorization

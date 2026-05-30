@@ -10,6 +10,11 @@ permissions:
   contents: read
   actions: read
 
+# Run the JS-based actions on Node 24 ahead of GitHub forcing it (Node 20 is
+# deprecated on the runners). Remove once Node 24 is the default.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 # Cancel superseded runs on the same ref (e.g. new pushes to a PR).
 concurrency:
   group: ci-${{ github.ref }}

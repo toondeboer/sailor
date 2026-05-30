@@ -55,7 +55,6 @@ export class TransactionsTableComponent {
       value: this.value,
       currency: this.currency,
     };
-    console.log('New transaction: ', newTransaction);
     const newTransactions = {
       stock: [...this.transactions.stock],
       dividend: [...this.transactions.dividend],
@@ -84,7 +83,6 @@ export class TransactionsTableComponent {
         }
         break;
       default:
-        console.log(`Invalid type: ${newTransaction.type}`);
         return;
     }
     this.store.dispatch(
