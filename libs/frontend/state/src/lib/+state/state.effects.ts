@@ -108,8 +108,14 @@ export class StateEffects {
     this.actions$.pipe(
       ofType(handleFileInput),
       switchMap(({ data }) => {
-        data = translateToDutch(data);
-        const newTransactions: Transactions = parseCsvInput(data);
+        let newTransactions: Transactions;
+        try {
+          newTransactions = parseCsvInput(translateToDutch(data));
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : 'Failed to parse CSV file';
+          return of(handleFileInputFailure({ error: message }));
+        }
 
         return this.service.setTransactions(newTransactions).pipe(
           map(({ transactions }) => {

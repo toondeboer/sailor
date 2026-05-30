@@ -173,7 +173,8 @@ export const reducer = createReducer(
               ...stock.summary,
               totalInvested,
               amountOfShares,
-              averageSharePrice: totalInvested / amountOfShares,
+              averageSharePrice:
+                amountOfShares !== 0 ? totalInvested / amountOfShares : 0,
               totalDividend,
               totalCommission,
             },
