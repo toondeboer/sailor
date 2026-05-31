@@ -43,9 +43,10 @@
   }
 }
 
+// 4 copies → -25% = exactly one copy width. Needs each copy > viewport/3 to fill.
 @keyframes ticker-scroll {
   from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  to   { transform: translateX(-25%); }
 }
 
 // ─── Items ────────────────────────────────────────────────────────────────────

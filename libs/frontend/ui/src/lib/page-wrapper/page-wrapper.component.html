@@ -39,8 +39,10 @@
             *ngFor="let nav of navigationOptions"
             (click)="routeTo(nav.path, snav)"
           >
-            <mat-icon matListItemIcon>{{ nav.icon }}</mat-icon>
-            <span matListItemTitle>{{ nav.text }}</span>
+            <span class="nav-inner">
+              <mat-icon>{{ nav.icon }}</mat-icon>
+              <span>{{ nav.text }}</span>
+            </span>
           </a>
         </mat-nav-list>
 

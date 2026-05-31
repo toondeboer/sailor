@@ -88,8 +88,20 @@ aws-scrolling-text {
   border-radius: 0 $radius-sm $radius-sm 0;
   margin-right: 8px;
 
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
   mat-icon {
     color: $color-muted;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    flex-shrink: 0;
     transition: $transition-base;
   }
 
