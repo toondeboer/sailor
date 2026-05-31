@@ -3,7 +3,8 @@
 Visit the website at [investments-tracker.toondeboer.com](https://investments-tracker.toondeboer.com/)
 
 An [Nx](https://nx.dev) monorepo: an **Angular 19 + NgRx** frontend, an **AWS Lambda + DynamoDB**
-backend (managed with AWS SAM), and **Cognito** authentication.
+backend (managed with AWS SAM), and **Cognito** authentication. See
+[ARCHITECTURE.md](ARCHITECTURE.md) for the project layout and data flow.
 
 ## Prerequisites
 
@@ -72,43 +73,29 @@ SAM APIs on `:3000` (see `apps/frontend/proxy.conf.json`).
 | Command | What it does |
 | --- | --- |
 | `nx serve frontend` | Run the app with hot reload |
-| `nx test util` / `nx run-many -t test` | Run unit tests |
+| `nx run-many -t test` / `nx test util` | Run unit tests |
 | `nx lint <project>` | Lint a project |
 | `nx build frontend` | Production build of the frontend |
+| `nx affected -t lint test build` | What CI runs on a PR |
 | `node libs/backend/lambdas/build.mjs` | Bundle the Lambdas (what CI does before deploy) |
+
+## CI
+
+GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs
+`nx affected -t lint test build` on every pull request and on pushes to `main`.
 
 ## Deployment (Infrastructure as Code)
 
 The backend is managed as code with AWS SAM/CloudFormation. `template.yaml` defines the two
-Lambdas, a single API Gateway, and their environment variables; `samconfig.toml` holds the
-per-environment deploy settings (stack name, region, parameters).
+Lambdas, a single API Gateway and their environment variables; `samconfig.toml` holds the
+per-stage deploy settings (stack name, region, and prod parameters — CORS origin, Cognito IDs).
 
-CI (`buildspec.yml`) builds the frontend, bundles the Lambdas (`libs/backend/lambdas/build.mjs`),
-and runs `sam deploy --config-env prod` to provision/update the whole stack. The frontend bundle
-is published as the build artifact. Production parameters (prod CORS origin, Cognito IDs) live in
-`samconfig.toml`'s `[prod.deploy.parameters]`.
+On every push to `main`, CodeBuild (`buildspec.yml`) builds the frontend, bundles the Lambdas
+(`libs/backend/lambdas/build.mjs`), and runs `sam deploy --config-env prod` to update the
+`investments-tracker-prod` stack. The frontend bundle is published as the build artifact.
 
-> **CodeBuild role:** `sam deploy` needs permission to manage CloudFormation, IAM, API Gateway,
-> Lambda and S3 — broader than the old `update-function-code` flow. Grant these to the CodeBuild
-> service role before the first CI deploy.
-
-### One-time migration to the SAM stack
-
-The original prod functions and API Gateways were created by hand; the SAM stack is a fresh set of
-resources with **new** API URLs, so a one-time cutover is required:
-
-1. Ensure the CodeBuild (or your local) role has the permissions above, then deploy the stack:
-   ```
-   node libs/backend/lambdas/build.mjs
-   sam deploy --config-env prod
-   ```
-2. Read the stack **Outputs** (`YahooEndpoint`, `MicroserviceEndpoint`) — e.g.
-   `sam list stack-outputs --stack-name investments-tracker-prod` — and paste them into
-   `apps/frontend/src/environments/environment.prod.ts` (`yahooLambdaUrl`, `dynamoDBLambdaUrl`).
-3. Rebuild and redeploy the frontend so it points at the new endpoints.
-4. Once verified, delete the **old** hand-made `yahoo_finance` / `microservice` functions and their
-   API Gateways.
-
-> The existing **`Investment_Tracker` DynamoDB table is intentionally not managed by the stack** so
-> a deploy can never replace it with an empty table — the function is only granted access to it.
-> Cognito callback URLs point at the frontend domain (unchanged), so no Cognito changes are needed.
+> - The CodeBuild role needs permission to manage CloudFormation, IAM, API Gateway, Lambda and S3.
+> - The `Investment_Tracker` DynamoDB table is intentionally **not** managed by the stack (so a
+>   deploy can never replace it with an empty table) — the Lambda is only granted access to it.
+> - After a deploy, the API URLs come from the stack Outputs (`YahooEndpoint` /
+>   `MicroserviceEndpoint`); they are baked into `apps/frontend/src/environments/environment.prod.ts`.
