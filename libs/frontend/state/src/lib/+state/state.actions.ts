@@ -6,6 +6,7 @@ import {
   Ticker,
   Transaction,
   TransactionKey,
+  TransactionsDbo,
   UserSettingsDbo,
 } from '@aws/util';
 import { createAction, props } from '@ngrx/store';
@@ -120,6 +121,17 @@ export const importDeGiroCsvFailure = createAction(
 export const importYahooCsv = createAction(
   '[State] Import Yahoo CSV',
   props<{ portfolioId: string; rawRows: unknown[]; mode: 'replace' | 'merge' }>()
+);
+// Dispatched after CSV parsing; carries the raw TransactionsDbo before
+// currency resolution. yahoo.effects intercepts this to fill in currencies.
+export const importYahooCsvParsed = createAction(
+  '[State] Import Yahoo CSV Parsed',
+  props<{ portfolioId: string; mode: 'replace' | 'merge'; incoming: TransactionsDbo }>()
+);
+// Dispatched by yahoo.effects after currency resolution; triggers the DB save.
+export const importYahooCsvReady = createAction(
+  '[State] Import Yahoo CSV Ready',
+  props<{ portfolioId: string; mode: 'replace' | 'merge'; incoming: TransactionsDbo }>()
 );
 export const importYahooCsvSuccess = createAction(
   '[State] Import Yahoo CSV Success',

@@ -97,4 +97,94 @@ describe('computePortfolioState', () => {
     expect(result.summary.totalInvested).toBe(0);
     expect(result.summary.portfolioValue).toBe(0);
   });
+
+  it('applies FX conversion when displayCurrency differs from stock currency', () => {
+    const usdDbo: TransactionsDbo = {
+      stock: [
+        {
+          ticker: 'AAPL',
+          type: 'stock',
+          date: '2023-01-10',
+          amount: 1,
+          value: 100,
+          currency: 'USD',
+        },
+      ],
+      dividend: [],
+      commission: [],
+    };
+
+    const dates = getDailyDates(
+      getStartDate(transactionsDboToStocks(usdDbo)),
+      new Date()
+    );
+
+    const stockTicker: Ticker = {
+      name: 'AAPL',
+      currency: 'USD',
+      dates,
+      values: dates.map(() => 200),
+      dividends: [],
+    };
+
+    // EUR=X represents the USD→EUR conversion rate. A rate of 0.9 means
+    // 1 USD = 0.9 EUR, so a $200 position becomes €180.
+    const fxTicker: Ticker = {
+      name: 'EUR=X',
+      currency: 'EUR',
+      dates,
+      values: dates.map(() => 0.9),
+      dividends: [],
+    };
+
+    const result = computePortfolioState(
+      usdDbo,
+      { AAPL: stockTicker, 'EUR=X': fxTicker },
+      'EUR'
+    );
+
+    // 1 share * $200 * 0.9 fx = €180
+    expect(result.summary.portfolioValue).toBeCloseTo(180);
+    expect(result.stocks['AAPL'].summary.portfolioValue).toBeCloseTo(180);
+    expect(result.stocks['AAPL'].summary.currentSharePrice).toBeCloseTo(180);
+  });
+
+  it('skips FX conversion when displayCurrency matches stock currency', () => {
+    const eurDbo: TransactionsDbo = {
+      stock: [
+        {
+          ticker: 'VUSA.AS',
+          type: 'stock',
+          date: '2023-01-10',
+          amount: 2,
+          value: 200,
+          currency: 'EUR',
+        },
+      ],
+      dividend: [],
+      commission: [],
+    };
+
+    const dates = getDailyDates(
+      getStartDate(transactionsDboToStocks(eurDbo)),
+      new Date()
+    );
+
+    const stockTicker: Ticker = {
+      name: 'VUSA.AS',
+      currency: 'EUR',
+      dates,
+      values: dates.map(() => 150),
+      dividends: [],
+    };
+
+    const result = computePortfolioState(
+      eurDbo,
+      { 'VUSA.AS': stockTicker },
+      'EUR'
+    );
+
+    // No FX applied: 2 shares * €150 = €300
+    expect(result.summary.portfolioValue).toBe(300);
+  });
 });

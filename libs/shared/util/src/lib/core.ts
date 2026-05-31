@@ -71,6 +71,14 @@ export function subtractLists(list1: number[], list2: number[]): number[] {
   return result;
 }
 
+export function multiplyLists(list1: number[], list2: number[]): number[] {
+  const result = [];
+  for (let i = 0; i < list1.length; i++) {
+    result.push(list1[i] * list2[i]);
+  }
+  return result;
+}
+
 export function addPerQuarterByYearLists(
   list1: { year: string; data: number[] }[],
   list2: { year: string; data: number[] }[]

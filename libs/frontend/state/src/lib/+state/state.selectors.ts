@@ -58,9 +58,10 @@ export const selectVisiblePortfoliosDbo = createSelector(
 const selectAggregatePortfolio = createSelector(
   selectVisiblePortfoliosDbo,
   selectTickers,
-  (portfolios, tickers) => {
+  selectBaseCurrency,
+  (portfolios, tickers, baseCurrency) => {
     const merged = mergeTransactionsDbo(portfolios.map((p) => p.transactions));
-    return computePortfolioState(merged, tickers);
+    return computePortfolioState(merged, tickers, baseCurrency);
   }
 );
 
@@ -68,7 +69,8 @@ const selectAggregatePortfolio = createSelector(
 export const selectAllPortfolioStates = createSelector(
   selectPortfoliosDbo,
   selectTickers,
-  (portfolios, tickers) => computeAllPortfolios(portfolios, tickers)
+  selectBaseCurrency,
+  (portfolios, tickers, baseCurrency) => computeAllPortfolios(portfolios, tickers, baseCurrency)
 );
 
 // Public view-model — same shape as before (transactions, stocks, dates, summary,

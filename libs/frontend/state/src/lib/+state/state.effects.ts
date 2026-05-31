@@ -30,6 +30,8 @@ import {
   importDeGiroCsvSuccess,
   importYahooCsv,
   importYahooCsvFailure,
+  importYahooCsvParsed,
+  importYahooCsvReady,
   importYahooCsvSuccess,
   renamePortfolio,
   renamePortfolioFailure,
@@ -281,11 +283,11 @@ export class StateEffects {
     )
   );
 
+  // Parse the CSV and hand off to yahoo.effects for currency resolution.
   public readonly importYahooCsv$ = createEffect(() =>
     this.actions$.pipe(
       ofType(importYahooCsv),
-      withLatestFrom(this.store.select(selectFeature)),
-      switchMap(([{ portfolioId, rawRows, mode }, state]) => {
+      switchMap(({ portfolioId, rawRows, mode }) => {
         let incoming;
         try {
           incoming = parseYahooCsvInput(rawRows);
@@ -294,14 +296,23 @@ export class StateEffects {
             error instanceof Error ? error.message : 'Failed to parse Yahoo Finance CSV';
           return of(importYahooCsvFailure({ error: message }));
         }
+        return of(importYahooCsvParsed({ portfolioId, mode, incoming }));
+      })
+    )
+  );
 
+  // Persist the transactions once currencies have been resolved by yahoo.effects.
+  public readonly importYahooCsvReady$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(importYahooCsvReady),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ portfolioId, mode, incoming }, state]) => {
         const updated = state.portfoliosDbo.map((p) => {
           if (p.id !== portfolioId) return p;
           const transactions =
             mode === 'replace' ? incoming : mergeTransactions(p.transactions, incoming);
           return { ...p, transactions };
         });
-
         return this.service.setData(buildPayload(state, updated)).pipe(
           map((data) => importYahooCsvSuccess({ data })),
           catchError((error: HttpErrorResponse) =>

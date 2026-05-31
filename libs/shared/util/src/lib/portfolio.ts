@@ -12,11 +12,43 @@ import {
   getStartDate,
   getTransactionAmountsAndValues,
   getYieldPerYear,
+  isSameDay,
+  multiplyLists,
   subtractLists,
   transactionsDboToStocks,
   transactionsDboToTransactions,
   updateDividends,
 } from './util';
+
+/**
+ * Returns an array of FX rates aligned to the given portfolio dates by carrying
+ * forward the last known rate. Defaults to 1 until the first FX data point
+ * arrives, so missing data produces no conversion rather than NaN.
+ */
+function getFxRates(dates: Date[], fxTicker: Ticker): number[] {
+  const rates: number[] = [];
+  let fxIdx = 0;
+  let lastKnownRate = 1;
+
+  for (const date of dates) {
+    while (
+      fxIdx < fxTicker.dates.length &&
+      !isSameDay(fxTicker.dates[fxIdx], date) &&
+      fxTicker.dates[fxIdx] < date
+    ) {
+      const val = fxTicker.values[fxIdx];
+      if (!isNaN(val) && val > 0) lastKnownRate = val;
+      fxIdx++;
+    }
+    if (fxIdx < fxTicker.dates.length && isSameDay(fxTicker.dates[fxIdx], date)) {
+      const val = fxTicker.values[fxIdx];
+      if (!isNaN(val) && val > 0) lastKnownRate = val;
+      fxIdx++;
+    }
+    rates.push(lastKnownRate);
+  }
+  return rates;
+}
 
 export interface PortfolioState {
   transactions: Transactions;
@@ -59,7 +91,8 @@ export function createInitialSummary(): Summary {
  */
 export function computePortfolioState(
   transactionsDbo: TransactionsDbo,
-  tickers: { [ticker: string]: Ticker }
+  tickers: { [ticker: string]: Ticker },
+  displayCurrency?: string
 ): PortfolioState {
   const baseStocks = transactionsDboToStocks(transactionsDbo);
   const transactions = transactionsDboToTransactions(transactionsDbo);
@@ -180,11 +213,36 @@ export function computePortfolioState(
       continue;
     }
 
-    const portfolioValues = getPortfolioValues(
+    const portfolioValuesNative = getPortfolioValues(
       dates,
       stock.chartData.stock.aggregatedAmounts,
       ticker
     );
+
+    // Apply FX conversion when the stock is denominated in a currency other
+    // than the display currency and a matching FX ticker is available.
+    const fxSymbol = stock.currency.yahooTicker;
+    const fxTicker =
+      displayCurrency &&
+      stock.currency.value !== displayCurrency &&
+      fxSymbol
+        ? tickers[fxSymbol]
+        : undefined;
+
+    let portfolioValues = portfolioValuesNative;
+    let investedForProfit = stock.chartData.stock.aggregatedValues;
+    let commissionForProfit = stock.chartData.commission.aggregatedValues;
+    let currentSharePrice = getMostRecentValueFromList(ticker.values).value;
+
+    if (fxTicker) {
+      const fxRates = getFxRates(dates, fxTicker);
+      portfolioValues = multiplyLists(portfolioValuesNative, fxRates);
+      investedForProfit = multiplyLists(stock.chartData.stock.aggregatedValues, fxRates);
+      commissionForProfit = multiplyLists(stock.chartData.commission.aggregatedValues, fxRates);
+      const lastFxRate = getMostRecentValueFromList(fxRates).value;
+      currentSharePrice = currentSharePrice * lastFxRate;
+    }
+
     aggregatedPortfolioValues =
       aggregatedPortfolioValues.length > 0
         ? addLists(aggregatedPortfolioValues, portfolioValues)
@@ -193,8 +251,8 @@ export function computePortfolioState(
     portfolioValuesSummary += portfolioValue;
 
     const profit = subtractLists(
-      subtractLists(portfolioValues, stock.chartData.stock.aggregatedValues),
-      stock.chartData.commission.aggregatedValues
+      subtractLists(portfolioValues, investedForProfit),
+      commissionForProfit
     );
     aggregatedProfit =
       aggregatedProfit.length > 0
@@ -226,7 +284,7 @@ export function computePortfolioState(
       summary: {
         ...stock.summary,
         portfolioValue,
-        currentSharePrice: getMostRecentValueFromList(ticker.values).value,
+        currentSharePrice,
         dailyReturn,
         weeklyReturn,
         monthlyReturn,
@@ -266,12 +324,13 @@ export function computePortfolioState(
  */
 export function computeAllPortfolios(
   portfoliosDbo: PortfolioDbo[],
-  tickers: { [ticker: string]: Ticker }
+  tickers: { [ticker: string]: Ticker },
+  baseCurrency?: string
 ): { [id: string]: PortfolioComputedState } {
   const result: { [id: string]: PortfolioComputedState } = {};
   for (const portfolio of portfoliosDbo) {
     result[portfolio.id] = {
-      ...computePortfolioState(portfolio.transactions, tickers),
+      ...computePortfolioState(portfolio.transactions, tickers, baseCurrency),
       portfolioId: portfolio.id,
       portfolioName: portfolio.name,
     };
