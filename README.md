@@ -10,7 +10,7 @@ DynamoDB** backend (managed with AWS SAM), authenticated with **Cognito**. See
 
 - **Node.js 22+**
 - **Yarn 1.x** (classic) — the repo uses Yarn workspaces
-- **Python 3.13+** — for the Lambda backend
+- **Python 3.13** — must match the Lambda runtime. Install with `brew install python@3.13`
 - **Docker** — runs DynamoDB locally
 - **AWS SAM CLI** — runs the Lambda APIs locally. With Homebrew:
   ```
@@ -23,10 +23,11 @@ DynamoDB** backend (managed with AWS SAM), authenticated with **Cognito**. See
 yarn install          # frontend + Nx toolchain
 ```
 
-Create a virtual environment for the Python backend (one-time setup):
+Create a virtual environment for the Python backend (one-time setup). Use `python3.13`
+explicitly — the venv version must match the Lambda runtime:
 
 ```
-python3 -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
 pip install -r services/requirements-dev.txt
 ```
