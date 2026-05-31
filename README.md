@@ -46,13 +46,19 @@ node libs/backend/lambdas/src/dynamodb/init-dynamodb.js
 
 ```
 node libs/backend/lambdas/build.mjs
-sam local start-api
+AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local sam local start-api
 ```
 
 `build.mjs` bundles each Lambda (with its dependencies, e.g. `jwks-rsa`) into a single file under
 `dist/lambdas/<name>/`, which is where `template.yaml`'s `CodeUri` points. `sam local start-api`
 then serves the functions on `http://localhost:3000`, reading configuration — Cognito
 user-pool/client IDs and allowed CORS origins — from `template.yaml` parameter defaults.
+
+> **AWS credentials:** `sam local` resolves your AWS credentials to inject into the Lambda
+> container, so an **expired AWS SSO session makes every request return 502**. The dummy
+> `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` above sidestep that — the dev Lambda talks to the
+> local DynamoDB with fake credentials and never needs real ones. (Or run `aws sso login` to
+> refresh real credentials instead.)
 
 > **Note:** the DynamoDB Lambda verifies the Cognito **ID token** on every request, so it needs
 > internet access to fetch the Cognito JWKS, and you must be signed in through the frontend (which
