@@ -38,6 +38,7 @@ export class ChartComponent implements OnChanges {
         textStyle: { color: NAUTICAL_TEXT },
       },
       grid: {
+        top: 48,
         containLabel: true,
       },
       tooltip: {
