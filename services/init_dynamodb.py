@@ -1,4 +1,4 @@
-"""Creates the Investment_Tracker table in DynamoDB Local for development.
+"""Creates the sailor table in DynamoDB Local for development.
 
 Usage:
     python services/init_dynamodb.py
@@ -14,7 +14,7 @@ dynamodb = boto3.client(
     aws_secret_access_key='fake',
 )
 
-TABLE_NAME = 'Investment_Tracker'
+TABLE_NAME = 'sailor'
 
 try:
     dynamodb.create_table(

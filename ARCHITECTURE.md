@@ -88,7 +88,7 @@ a user can only read/write their own data.
 
 Two Python 3.13 Lambdas behind one API Gateway:
 
-- **dynamodb** (`handler_dynamodb.py`) — CRUD over the `Investment_Tracker` table (partition key =
+- **dynamodb** (`handler_dynamodb.py`) — CRUD over the `sailor` table (partition key =
   Cognito `sub`); verifies the Cognito ID token's signature via JWKS; CORS via an origin allowlist
   that reflects the request `Origin`.
 - **yahoo** (`handler_yahoo.py`) — fans out to the Yahoo Finance API for the requested symbols
@@ -100,7 +100,7 @@ Two Python 3.13 Lambdas behind one API Gateway:
 ## Infrastructure & CI
 
 - **IaC:** `template.yaml` (SAM) defines the Lambdas, API Gateway and env vars; `samconfig.toml`
-  holds per-stage deploy params. The `Investment_Tracker` table is referenced, not managed by the
+  holds per-stage deploy params. The `sailor` table is referenced, not managed by the
   stack (so a deploy can't replace user data).
 - **Deploy:** `buildspec.yml` builds the frontend, bundles the Lambdas, and runs
   `sam deploy --config-env prod`.
