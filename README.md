@@ -21,7 +21,7 @@ DynamoDB** backend (managed with AWS SAM), authenticated with **Cognito**. See
 
 ```
 yarn install          # frontend + Nx toolchain
-pip install -r services/requirements-dev.txt   # Lambda deps + boto3 for local dev / IDE
+python3 -m pip install -r services/requirements-dev.txt   # Lambda deps + boto3 for local dev / IDE
 ```
 
 ## Run locally
