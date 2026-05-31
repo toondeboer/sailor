@@ -109,10 +109,10 @@ per-stage deploy settings (stack name, region, and prod parameters — CORS orig
 
 On every push to `main`, CodeBuild (`buildspec.yml`) builds the frontend, runs `sam build` to
 package the Python Lambdas, and runs `sam deploy --config-env prod` to update the
-`investments-tracker-prod` stack. The frontend bundle is published as the build artifact.
+`sailor-prod` stack. The frontend bundle is published as the build artifact.
 
 > - The CodeBuild role needs permission to manage CloudFormation, IAM, API Gateway, Lambda and S3.
-> - The `Investment_Tracker` DynamoDB table is intentionally **not** managed by the stack (so a
+> - The `sailor` DynamoDB table is intentionally **not** managed by the stack (so a
 >   deploy can never replace it with an empty table) — the Lambda is only granted access to it.
 > - After a deploy, the API URLs come from the stack Outputs (`YahooEndpoint` /
 >   `MicroserviceEndpoint`); they are baked into `apps/frontend/src/environments/environment.prod.ts`.

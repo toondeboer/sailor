@@ -7,7 +7,8 @@ from boto3.dynamodb.conditions import Key
 from shared.auth import verify_token
 from shared.cors import build_headers
 
-_TABLE_NAME = 'Investment_Tracker'
+_TABLE_NAME = 'sailor'
+_CURRENT_SCHEMA_VERSION = 1
 
 
 def _get_table():
@@ -58,14 +59,24 @@ def handler(event, context):
         if method == 'GET':
             resp = table.query(KeyConditionExpression=Key('userId').eq(user_id))
             items = resp.get('Items', [])
-            # New users have no row yet — return an empty transactions object.
-            body = items[0]['transactions'] if items else '{}'
+            if not items:
+                # New users have no row yet — return an empty transactions object.
+                body = '{}'
+            else:
+                item = items[0]
+                # schemaVersion is absent on pre-migration items (treat as v0).
+                # Add per-version migration branches here as the schema evolves.
+                _schema_version = int(item.get('schemaVersion', 0))
+                body = item.get('transactions', '{}')
 
         elif method == 'PUT':
             resp = table.update_item(
                 Key={'userId': user_id},
-                UpdateExpression='SET transactions = :t',
-                ExpressionAttributeValues={':t': event.get('body', '{}')},
+                UpdateExpression='SET transactions = :t, schemaVersion = :v',
+                ExpressionAttributeValues={
+                    ':t': event.get('body', '{}'),
+                    ':v': _CURRENT_SCHEMA_VERSION,
+                },
                 ReturnValues='ALL_NEW',
             )
             body = resp['Attributes']['transactions']

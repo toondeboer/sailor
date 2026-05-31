@@ -5,7 +5,7 @@ version = 0.1
 #  first — the buildspec does this in CI.)
 
 [default.deploy.parameters]
-stack_name = "investments-tracker"
+stack_name = "sailor"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 resolve_s3 = true
@@ -14,10 +14,10 @@ fail_on_empty_changeset = false
 parameter_overrides = "Stage=\"dev\" AllowedOrigins=\"http://localhost:4200\""
 
 [prod.deploy.parameters]
-stack_name = "investments-tracker-prod"
+stack_name = "sailor-prod"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 resolve_s3 = true
 confirm_changeset = false
 fail_on_empty_changeset = false
-parameter_overrides = "Stage=\"prod\" AllowedOrigins=\"https://investments-tracker.toondeboer.com\" CognitoUserPoolId=\"us-east-1_liCB4LgDE\" CognitoClientId=\"3o34bbl92faeo9ljo11eebtim2\""
+parameter_overrides = "Stage=\"prod\" AllowedOrigins=\"https://sailor.toondeboer.com\" CognitoUserPoolId=\"us-east-1_liCB4LgDE\" CognitoClientId=\"3o34bbl92faeo9ljo11eebtim2\" TableName=\"sailor\""

@@ -22,7 +22,7 @@ Parameters:
     Default: 3o34bbl92faeo9ljo11eebtim2
   TableName:
     Type: String
-    Default: Investment_Tracker
+    Default: sailor
     Description: >
       Existing DynamoDB table (holds user data). Intentionally NOT created by this
       stack so a fresh deploy can't replace it with an empty table — the function is
