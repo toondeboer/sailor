@@ -1,15 +1,16 @@
-# Investments Tracker
+# sailor
 
-Visit the website at [investments-tracker.toondeboer.com](https://investments-tracker.toondeboer.com/)
+Visit the website at [sailor.toondeboer.com](https://sailor.toondeboer.com/)
 
-An [Nx](https://nx.dev) monorepo: an **Angular 19 + NgRx** frontend, an **AWS Lambda + DynamoDB**
-backend (managed with AWS SAM), and **Cognito** authentication. See
+An [Nx](https://nx.dev) monorepo: an **Angular 19 + NgRx** frontend and **Python AWS Lambda +
+DynamoDB** backend (managed with AWS SAM), authenticated with **Cognito**. See
 [ARCHITECTURE.md](ARCHITECTURE.md) for the project layout and data flow.
 
 ## Prerequisites
 
 - **Node.js 22+**
 - **Yarn 1.x** (classic) — the repo uses Yarn workspaces
+- **Python 3.13+** — for the Lambda backend
 - **Docker** — runs DynamoDB locally
 - **AWS SAM CLI** — runs the Lambda APIs locally. With Homebrew:
   ```
@@ -19,11 +20,9 @@ backend (managed with AWS SAM), and **Cognito** authentication. See
 ## Install dependencies
 
 ```
-yarn install
+yarn install          # frontend + Nx toolchain
+pip install -r services/requirements.txt   # Lambda dependencies (for local dev / IDE)
 ```
-
-This installs the frontend **and** the Lambda dependencies (the Lambda packages are Yarn
-workspace members).
 
 ## Run locally
 
@@ -39,18 +38,17 @@ docker-compose up
 The first time only, create the table:
 
 ```
-node libs/backend/lambdas/src/dynamodb/init-dynamodb.js
+python services/init_dynamodb.py
 ```
 
 ### 2. Start the backend APIs (AWS SAM)
 
 ```
-node libs/backend/lambdas/build.mjs
+sam build
 AWS_ACCESS_KEY_ID=local AWS_SECRET_ACCESS_KEY=local sam local start-api
 ```
 
-`build.mjs` bundles each Lambda (with its dependencies, e.g. `jwks-rsa`) into a single file under
-`dist/lambdas/<name>/`, which is where `template.yaml`'s `CodeUri` points. `sam local start-api`
+`sam build` installs `services/requirements.txt` into the deployment package. `sam local start-api`
 then serves the functions on `http://localhost:3000`, reading configuration — Cognito
 user-pool/client IDs and allowed CORS origins — from `template.yaml` parameter defaults.
 
@@ -62,8 +60,7 @@ user-pool/client IDs and allowed CORS origins — from `template.yaml` parameter
 
 > **Note:** the DynamoDB Lambda verifies the Cognito **ID token** on every request, so it needs
 > internet access to fetch the Cognito JWKS, and you must be signed in through the frontend (which
-> supplies a valid token). Re-run `node libs/backend/lambdas/build.mjs` whenever you change a
-> Lambda's code.
+> supplies a valid token). Re-run `sam build` whenever you change Lambda code.
 
 ### 3. Start the frontend
 
@@ -83,7 +80,7 @@ SAM APIs on `:3000` (see `apps/frontend/proxy.conf.json`).
 | `nx lint <project>` | Lint a project |
 | `nx build frontend` | Production build of the frontend |
 | `nx affected -t lint test build` | What CI runs on a PR |
-| `node libs/backend/lambdas/build.mjs` | Bundle the Lambdas (what CI does before deploy) |
+| `sam build` | Package the Python Lambdas (what CI does before deploy) |
 
 ## CI
 
@@ -96,8 +93,8 @@ The backend is managed as code with AWS SAM/CloudFormation. `template.yaml` defi
 Lambdas, a single API Gateway and their environment variables; `samconfig.toml` holds the
 per-stage deploy settings (stack name, region, and prod parameters — CORS origin, Cognito IDs).
 
-On every push to `main`, CodeBuild (`buildspec.yml`) builds the frontend, bundles the Lambdas
-(`libs/backend/lambdas/build.mjs`), and runs `sam deploy --config-env prod` to update the
+On every push to `main`, CodeBuild (`buildspec.yml`) builds the frontend, runs `sam build` to
+package the Python Lambdas, and runs `sam deploy --config-env prod` to update the
 `investments-tracker-prod` stack. The frontend bundle is published as the build artifact.
 
 > - The CodeBuild role needs permission to manage CloudFormation, IAM, API Gateway, Lambda and S3.

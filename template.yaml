@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Investments Tracker backend — Yahoo Finance + DynamoDB Lambdas behind a single
+  sailor backend — Yahoo Finance + DynamoDB Lambdas behind a single
   API Gateway. Managed as code (CloudFormation/SAM); deploy with `sam deploy`.
 
 Parameters:
@@ -30,11 +30,14 @@ Parameters:
 
 Globals:
   Function:
-    Runtime: nodejs22.x
+    Runtime: python3.13
     Architectures: [x86_64]
     # Yahoo fetches and the Cognito JWKS lookup can exceed the 3s default.
     Timeout: 30
     MemorySize: 256
+    # All Lambdas share the same services/ directory so shared/ utilities are
+    # importable without a Lambda layer.
+    CodeUri: services/
 
 Resources:
   Api:
@@ -45,10 +48,7 @@ Resources:
   YahooFunction:
     Type: AWS::Serverless::Function
     Properties:
-      # Pre-bundled by esbuild (libs/backend/lambdas/build.mjs) into a single
-      # self-contained file; @aws-sdk is left external (provided by the runtime).
-      CodeUri: dist/lambdas/yahoo/
-      Handler: index.handler
+      Handler: handler_yahoo.handler
       Environment:
         Variables:
           ALLOWED_ORIGINS: !Ref AllowedOrigins
@@ -64,8 +64,7 @@ Resources:
   DynamoDBFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: dist/lambdas/dynamodb/
-      Handler: index.handler
+      Handler: handler_dynamodb.handler
       Environment:
         Variables:
           ENVIRONMENT: !Ref Stage

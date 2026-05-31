@@ -4,33 +4,26 @@ phases:
   install:
     runtime-versions:
       nodejs: 22
+      python: 3.13
     commands:
       - echo Installing nx...
       - yarn global add nx
-      # The CodeBuild standard images ship the SAM CLI; install it if missing.
       - sam --version || pip install aws-sam-cli
   pre_build:
     commands:
-      - echo Installing dependencies...
-      # Root install covers the Lambda packages too (they are workspace members).
+      - echo Installing frontend dependencies...
       - yarn install
-      - echo Installing dependencies completed
   build:
     commands:
       - echo Building frontend...
       - nx build frontend
-      - echo Bundling Lambda functions...
-      # esbuild bundles each handler + its deps into a single self-contained file
-      # under dist/lambdas/<name>/index.mjs (the template's CodeUri points there).
-      - node libs/backend/lambdas/build.mjs
+      - echo Building Python Lambda packages...
+      # sam build installs requirements.txt into each function's deployment package.
+      - sam build
       - echo Build completed on `date`
   post_build:
     commands:
       - echo Deploying backend stack with SAM...
-      # Infrastructure as code: provisions/updates the Lambdas + API Gateway +
-      # env vars from template.yaml. Config (stack name, region, prod params) is
-      # in samconfig.toml [prod]. Requires the CodeBuild role to have permission
-      # to manage CloudFormation, IAM, API Gateway, Lambda and S3.
       - sam deploy --config-env prod --no-confirm-changeset --no-fail-on-empty-changeset
       - echo Deployment completed on `date`
 
