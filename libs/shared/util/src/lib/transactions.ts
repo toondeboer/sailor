@@ -1,6 +1,8 @@
 import {
   Stock,
   Transaction,
+  TransactionDbo,
+  TransactionKey,
   TransactionType,
   Transactions,
   TransactionsDbo,
@@ -297,4 +299,63 @@ export function getCurrencies(stocks: { [ticker: string]: Stock }): string[] {
     }
   }
   return currencies;
+}
+
+export function transactionToTransactionDbo(tx: Transaction): TransactionDbo {
+  return {
+    ticker: tx.ticker,
+    type: tx.type,
+    date: tx.date.toISOString().split('T')[0],
+    time: tx.time,
+    amount: tx.amount,
+    value: tx.value,
+    currency: tx.currency,
+  };
+}
+
+function txDboKey(tx: TransactionDbo): string {
+  return `${tx.ticker}|${tx.date}|${tx.time ?? ''}|${tx.value}`;
+}
+
+export function deduplicateTransactions(txs: TransactionDbo[]): TransactionDbo[] {
+  const seen = new Set<string>();
+  return txs.filter((tx) => {
+    const key = txDboKey(tx);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export function mergeTransactionsDbo(all: TransactionsDbo[]): TransactionsDbo {
+  const stock: TransactionDbo[] = [];
+  const dividend: TransactionDbo[] = [];
+  const commission: TransactionDbo[] = [];
+  for (const t of all) {
+    stock.push(...t.stock);
+    dividend.push(...t.dividend);
+    commission.push(...t.commission);
+  }
+  return {
+    stock: deduplicateTransactions(stock),
+    dividend: deduplicateTransactions(dividend),
+    commission: deduplicateTransactions(commission),
+  };
+}
+
+export function mergeTransactions(
+  existing: TransactionsDbo,
+  incoming: TransactionsDbo
+): TransactionsDbo {
+  return mergeTransactionsDbo([existing, incoming]);
+}
+
+export function matchesTransactionKey(tx: TransactionDbo, key: TransactionKey): boolean {
+  return (
+    tx.type === key.type &&
+    tx.ticker === key.ticker &&
+    tx.date === key.date &&
+    (tx.time ?? '') === (key.time ?? '') &&
+    tx.value === key.value
+  );
 }

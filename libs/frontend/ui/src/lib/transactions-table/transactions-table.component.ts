@@ -7,15 +7,15 @@ import {
 } from '@aws/state';
 import {
   Transaction,
+  TransactionKey,
   TransactionType,
   Transactions,
   Stock,
-  TransactionsDbo,
 } from '@aws/util';
 import { Store } from '@ngrx/store';
 import { Papa } from 'ngx-papaparse';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, DecimalPipe, NgForOf, NgIf } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'aws-transactions-table',
@@ -26,6 +26,7 @@ import { CommonModule, DecimalPipe, NgForOf, NgIf } from '@angular/common';
 export class TransactionsTableComponent {
   @Input() stocks: { [ticker: string]: Stock } = {};
   @Input() transactions: Transactions | undefined;
+  @Input() portfolioId = 'default';
 
   constructor(
     private readonly store: Store,
@@ -38,16 +39,12 @@ export class TransactionsTableComponent {
   date = new Date();
   amount = 0;
   value = 0;
-  currency: 'EUR' | 'USD' = 'EUR'
+  currency: 'EUR' | 'USD' = 'EUR';
 
   csvData: any[] = [];
 
   saveTransaction() {
-    if (!this.transactions) {
-      console.error('Transactions not initialized.');
-      return;
-    }
-    const newTransaction = {
+    const newTransaction: Transaction = {
       ticker: this.ticker,
       type: this.type,
       date: new Date(this.date),
@@ -55,50 +52,24 @@ export class TransactionsTableComponent {
       value: this.value,
       currency: this.currency,
     };
-    const newTransactions = {
-      stock: [...this.transactions.stock],
-      dividend: [...this.transactions.dividend],
-      commission: [...this.transactions.commission],
-    };
-    switch (newTransaction.type) {
-      case 'stock':
-        if (newTransactions.stock.length > 0) {
-          newTransactions.stock.push(newTransaction);
-        } else {
-          newTransactions.stock = [newTransaction];
-        }
-        break;
-      case 'dividend':
-        if (newTransactions.dividend.length > 0) {
-          newTransactions.dividend.push(newTransaction);
-        } else {
-          newTransactions.dividend = [newTransaction];
-        }
-        break;
-      case 'commission':
-        if (newTransactions.commission.length > 0) {
-          newTransactions.commission.push(newTransaction);
-        } else {
-          newTransactions.commission = [newTransaction];
-        }
-        break;
-      default:
-        return;
-    }
     this.store.dispatch(
-      saveTransaction({
-        transactions: newTransactions,
-      })
+      saveTransaction({ portfolioId: this.portfolioId, transaction: newTransaction })
     );
   }
 
-  deleteTransaction(transactions: Transactions, transaction: Transaction) {
-    // const newTransactions = transactions.filter((t) => t != transaction);
-    // this.store.dispatch(deleteTransaction({ newTransactions }));
+  deleteTransactionEntry(transaction: Transaction) {
+    const key: TransactionKey = {
+      type: transaction.type,
+      ticker: transaction.ticker,
+      date: transaction.date.toISOString().split('T')[0],
+      time: transaction.time,
+      value: transaction.value,
+    };
+    this.store.dispatch(deleteTransaction({ portfolioId: this.portfolioId, transactionKey: key }));
   }
 
   deleteAll() {
-    this.store.dispatch(deleteAllTransactions());
+    this.store.dispatch(deleteAllTransactions({ portfolioId: this.portfolioId }));
   }
 
   handleFileInput(event: Event) {
@@ -108,7 +79,7 @@ export class TransactionsTableComponent {
       this.papa.parse(file, {
         complete: (result) => {
           this.csvData = result.data;
-          this.cdr.detectChanges(); // Trigger change detection to update the view
+          this.cdr.detectChanges();
           this.store.dispatch(handleFileInput({ data: result.data }));
         },
         header: true,

@@ -1,0 +1,37 @@
+<h2 mat-dialog-title>Import CSV</h2>
+
+<mat-dialog-content class="csv-dialog-content">
+
+  <div class="field-group">
+    <div class="field-label">Format</div>
+    <mat-radio-group [(ngModel)]="format" class="radio-group">
+      <mat-radio-button value="degiro">DeGiro CSV</mat-radio-button>
+      <mat-radio-button value="yahoo">Yahoo Finance CSV</mat-radio-button>
+    </mat-radio-group>
+  </div>
+
+  <div class="field-group">
+    <div class="field-label">Import mode</div>
+    <mat-radio-group [(ngModel)]="mode" class="radio-group">
+      <mat-radio-button value="replace">Replace existing transactions</mat-radio-button>
+      <mat-radio-button value="merge">Add to existing (deduplicate)</mat-radio-button>
+    </mat-radio-group>
+  </div>
+
+  <div class="field-group">
+    <div class="field-label">File</div>
+    <label class="file-upload-area">
+      <span *ngIf="!fileName" class="upload-hint">Click to select a CSV file</span>
+      <span *ngIf="fileName" class="file-name">{{ fileName }} ({{ rows.length }} rows)</span>
+      <input type="file" accept=".csv" (change)="onFileSelected($event)" class="hidden-input" />
+    </label>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="confirm()" [disabled]="rows.length === 0">
+    Import
+  </button>
+</mat-dialog-actions>

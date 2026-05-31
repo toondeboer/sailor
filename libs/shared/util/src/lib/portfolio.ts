@@ -1,4 +1,4 @@
-import { Stock, Summary, Ticker, Transactions, TransactionsDbo } from './types';
+import { PortfolioDbo, Stock, Summary, Ticker, Transactions, TransactionsDbo } from './types';
 import {
   addLists,
   getCurrencies,
@@ -24,6 +24,11 @@ export interface PortfolioState {
   dates: Date[];
   summary: Summary;
   currencies: string[];
+}
+
+export interface PortfolioComputedState extends PortfolioState {
+  portfolioId: string;
+  portfolioName: string;
 }
 
 export function createInitialSummary(): Summary {
@@ -253,4 +258,23 @@ export function computePortfolioState(
   };
 
   return { transactions, stocks: chartedStocks, dates, summary, currencies };
+}
+
+/**
+ * Runs computePortfolioState for each portfolio and returns a map keyed by
+ * portfolio ID. Used by per-portfolio selectors and the Portfolios page.
+ */
+export function computeAllPortfolios(
+  portfoliosDbo: PortfolioDbo[],
+  tickers: { [ticker: string]: Ticker }
+): { [id: string]: PortfolioComputedState } {
+  const result: { [id: string]: PortfolioComputedState } = {};
+  for (const portfolio of portfoliosDbo) {
+    result[portfolio.id] = {
+      ...computePortfolioState(portfolio.transactions, tickers),
+      portfolioId: portfolio.id,
+      portfolioName: portfolio.name,
+    };
+  }
+  return result;
 }

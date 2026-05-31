@@ -1,20 +1,44 @@
-<div class="page" *ngIf="state$ | async as state">
+<div
+  class="page"
+  *ngIf="{
+    state: state$ | async,
+    portfolios: portfolios$ | async,
+    selectedIds: selectedPortfolioIds$ | async,
+    currency: baseCurrency$ | async
+  } as vm"
+>
 
   <header class="page-header">
     <h1 class="page-title">Portfolio</h1>
-    <p class="page-subtitle" *ngIf="state.summary.startDate">
-      Since {{ state.summary.startDate | date : 'MMM yyyy' }}
+    <p class="page-subtitle" *ngIf="vm.state?.summary?.startDate">
+      Since {{ vm.state?.summary?.startDate | date : 'MMM yyyy' }}
     </p>
   </header>
 
-  <section class="page-section">
-    <aws-summary [summary]="state.summary"></aws-summary>
+  <!-- Portfolio filter chips (shown only when multiple portfolios exist) -->
+  <section class="page-section" *ngIf="(vm.portfolios?.length ?? 0) > 1">
+    <div class="filter-label">Portfolios</div>
+    <div class="chips">
+      <button
+        *ngFor="let portfolio of vm.portfolios"
+        class="chip"
+        [class.active]="isPortfolioActive(portfolio.id, vm.selectedIds ?? 'all')"
+        (click)="togglePortfolio(portfolio.id, vm.selectedIds ?? 'all', portfolioIds(vm.portfolios ?? []))"
+        type="button"
+      >
+        {{ portfolio.name }}
+      </button>
+    </div>
   </section>
 
-  <section class="page-section" *ngIf="state.summary.portfolioValue > 0">
+  <section class="page-section">
+    <aws-summary [summary]="vm.state?.summary" [currency]="vm.currency ?? 'EUR'"></aws-summary>
+  </section>
+
+  <section class="page-section" *ngIf="vm.state?.summary?.portfolioValue">
     <aws-active-tickers
-      [dates]="state.dates"
-      [stocks]="state.stocks"
+      [dates]="vm.state?.dates ?? []"
+      [stocks]="vm.state?.stocks ?? {}"
     ></aws-active-tickers>
   </section>
 

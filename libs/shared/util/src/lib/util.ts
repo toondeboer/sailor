@@ -5,4 +5,5 @@ export * from './csv-import';
 export * from './dividends';
 export * from './returns';
 export * from './transactions';
+export * from './yahoo-csv-import';
 export * from './yahoo-mapping';

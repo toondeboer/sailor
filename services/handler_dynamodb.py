@@ -8,7 +8,30 @@ from shared.auth import verify_token
 from shared.cors import build_headers
 
 _TABLE_NAME = 'sailor'
-_CURRENT_SCHEMA_VERSION = 1
+_CURRENT_SCHEMA_VERSION = 2
+
+_EMPTY_V2 = {
+    'schemaVersion': 2,
+    'settings': {'baseCurrency': 'EUR'},
+    'portfolios': [
+        {'id': 'default', 'name': 'Default', 'transactions': {'stock': [], 'dividend': [], 'commission': []}}
+    ],
+}
+
+
+def _migrate_v1_to_v2(item):
+    """Wrap a v1 flat-transactions item into the v2 multi-portfolio shape."""
+    try:
+        legacy_transactions = json.loads(item.get('transactions', '{}'))
+    except (json.JSONDecodeError, TypeError):
+        legacy_transactions = {'stock': [], 'dividend': [], 'commission': []}
+    return {
+        'schemaVersion': 2,
+        'settings': {'baseCurrency': 'EUR'},
+        'portfolios': [
+            {'id': 'default', 'name': 'Default', 'transactions': legacy_transactions}
+        ],
+    }
 
 
 def _get_table():
@@ -60,26 +83,46 @@ def handler(event, context):
             resp = table.query(KeyConditionExpression=Key('userId').eq(user_id))
             items = resp.get('Items', [])
             if not items:
-                # New users have no row yet — return a valid empty DatabaseDto.
-                body = '{"transactions":{"stock":[],"dividend":[],"commission":[]}}'
+                body = json.dumps(_EMPTY_V2)
             else:
                 item = items[0]
-                # schemaVersion is absent on pre-migration items (treat as v0).
-                # Add per-version migration branches here as the schema evolves.
-                _schema_version = int(item.get('schemaVersion', 0))
-                body = item.get('transactions', '{}')
+                schema_version = int(item.get('schemaVersion', 0))
+                if schema_version < 2:
+                    # Migrate: wrap legacy flat transactions in a default portfolio.
+                    body = json.dumps(_migrate_v1_to_v2(item))
+                else:
+                    # v2 data is stored under the 'data' key.
+                    body = item.get('data', json.dumps(_EMPTY_V2))
 
         elif method == 'PUT':
+            try:
+                payload = json.loads(event.get('body', '{}'))
+            except (json.JSONDecodeError, TypeError):
+                return {
+                    'statusCode': 400,
+                    'body': json.dumps({'message': 'Invalid JSON body'}),
+                    'headers': headers,
+                }
+
+            if payload.get('schemaVersion') != 2:
+                return {
+                    'statusCode': 400,
+                    'body': json.dumps({'message': 'Unsupported schema version. Expected schemaVersion: 2.'}),
+                    'headers': headers,
+                }
+
+            body_str = json.dumps(payload)
             resp = table.update_item(
                 Key={'userId': user_id},
-                UpdateExpression='SET transactions = :t, schemaVersion = :v',
+                UpdateExpression='SET #data = :d, schemaVersion = :v',
+                ExpressionAttributeNames={'#data': 'data'},
                 ExpressionAttributeValues={
-                    ':t': event.get('body', '{}'),
+                    ':d': body_str,
                     ':v': _CURRENT_SCHEMA_VERSION,
                 },
                 ReturnValues='ALL_NEW',
             )
-            body = resp['Attributes']['transactions']
+            body = resp['Attributes']['data']
 
         else:
             raise ValueError(f'Unsupported method: {method}')

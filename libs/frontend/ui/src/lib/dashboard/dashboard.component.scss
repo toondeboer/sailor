@@ -28,3 +28,37 @@
 .page-section {
   margin-top: 24px;
 }
+
+.filter-label {
+  font-size: 12px;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &.active {
+    background: rgba(var(--primary-rgb, 100, 150, 255), 0.2);
+    border-color: rgba(var(--primary-rgb, 100, 150, 255), 0.6);
+  }
+
+  &:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}

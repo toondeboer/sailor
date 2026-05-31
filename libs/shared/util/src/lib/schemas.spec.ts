@@ -6,62 +6,95 @@ beforeAll(() => {
 });
 afterAll(() => jest.restoreAllMocks());
 
+const validTransaction = {
+  ticker: 'VUSA.AS',
+  type: 'stock',
+  date: '2023-01-10',
+  amount: 2,
+  value: 200,
+  currency: 'EUR',
+};
+
+const validTransactionsDbo = {
+  stock: [validTransaction],
+  dividend: [],
+  commission: [],
+};
+
 describe('parseDatabaseDto', () => {
-  const valid = {
-    transactions: {
-      stock: [
-        {
-          ticker: 'VUSA.AS',
-          type: 'stock',
-          date: '2023-01-10',
-          amount: 2,
-          value: 200,
-          currency: 'EUR',
-        },
-      ],
-      dividend: [],
-      commission: [],
-    },
-  };
+  describe('v2 input', () => {
+    const validV2 = {
+      schemaVersion: 2,
+      settings: { baseCurrency: 'EUR' },
+      portfolios: [{ id: 'p1', name: 'My Portfolio', transactions: validTransactionsDbo }],
+    };
 
-  it('accepts a well-formed response and defaults startDate', () => {
-    const result = parseDatabaseDto(valid);
-    expect(result.transactions.stock).toHaveLength(1);
-    expect(result.startDate).toBe('');
-  });
-
-  it('keeps startDate and tolerates extra fields', () => {
-    const result = parseDatabaseDto({
-      ...valid,
-      startDate: '2023-01-10',
-      extraneous: 'ignored',
+    it('accepts a well-formed v2 response', () => {
+      const result = parseDatabaseDto(validV2);
+      expect(result.schemaVersion).toBe(2);
+      expect(result.portfolios).toHaveLength(1);
+      expect(result.portfolios[0].transactions.stock).toHaveLength(1);
+      expect(result.settings.baseCurrency).toBe('EUR');
     });
-    expect(result.startDate).toBe('2023-01-10');
-  });
 
-  it('throws when transactions is missing', () => {
-    expect(() => parseDatabaseDto({})).toThrow();
-  });
-
-  it('throws when a numeric field is the wrong type', () => {
-    expect(() =>
-      parseDatabaseDto({
-        transactions: {
-          stock: [
-            {
-              ticker: 'VUSA.AS',
-              type: 'stock',
-              date: '2023-01-10',
-              amount: 2,
-              value: 'not-a-number',
-              currency: 'EUR',
-            },
-          ],
+    it('transaction time field is optional', () => {
+      const withTime = {
+        ...validV2,
+        portfolios: [{ id: 'p1', name: 'My Portfolio', transactions: {
+          stock: [{ ...validTransaction, time: '14:32' }],
           dividend: [],
           commission: [],
-        },
-      })
-    ).toThrow();
+        }}],
+      };
+      const result = parseDatabaseDto(withTime);
+      expect(result.portfolios[0].transactions.stock[0].time).toBe('14:32');
+    });
+
+    it('throws when a numeric field is the wrong type', () => {
+      expect(() =>
+        parseDatabaseDto({
+          ...validV2,
+          portfolios: [{ id: 'p1', name: 'My Portfolio', transactions: {
+            stock: [{ ...validTransaction, value: 'not-a-number' }],
+            dividend: [],
+            commission: [],
+          }}],
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('v1 migration', () => {
+    const validV1 = { transactions: validTransactionsDbo };
+
+    it('migrates v1 to v2 wrapping transactions in Default portfolio', () => {
+      const result = parseDatabaseDto(validV1);
+      expect(result.schemaVersion).toBe(2);
+      expect(result.portfolios).toHaveLength(1);
+      expect(result.portfolios[0].name).toBe('Default');
+      expect(result.portfolios[0].id).toBe('default');
+      expect(result.portfolios[0].transactions.stock).toHaveLength(1);
+      expect(result.settings.baseCurrency).toBe('EUR');
+    });
+
+    it('migrates v1 with extra fields without error', () => {
+      const result = parseDatabaseDto({ ...validV1, startDate: '2023-01-01', extraneous: 'ignored' });
+      expect(result.schemaVersion).toBe(2);
+    });
+  });
+
+  describe('empty / null input', () => {
+    it('returns empty v2 for null', () => {
+      const result = parseDatabaseDto(null);
+      expect(result.schemaVersion).toBe(2);
+      expect(result.portfolios).toHaveLength(1);
+      expect(result.portfolios[0].transactions.stock).toHaveLength(0);
+    });
+
+    it('returns empty v2 for empty object', () => {
+      const result = parseDatabaseDto({});
+      expect(result.schemaVersion).toBe(2);
+    });
   });
 });
 

@@ -6,9 +6,15 @@ import { Store } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { switchMap, catchError, of, map, tap, withLatestFrom } from 'rxjs';
 import {
+  createPortfolio,
+  createPortfolioFailure,
+  createPortfolioSuccess,
   deleteAllTransactions,
   deleteAllTransactionsFailure,
   deleteAllTransactionsSuccess,
+  deletePortfolio,
+  deletePortfolioFailure,
+  deletePortfolioSuccess,
   deleteTransaction,
   deleteTransactionFailure,
   deleteTransactionSuccess,
@@ -19,17 +25,37 @@ import {
   handleFileInput,
   handleFileInputFailure,
   handleFileInputSuccess,
+  importDeGiroCsv,
+  importDeGiroCsvFailure,
+  importDeGiroCsvSuccess,
+  importYahooCsv,
+  importYahooCsvFailure,
+  importYahooCsvSuccess,
+  renamePortfolio,
+  renamePortfolioFailure,
+  renamePortfolioSuccess,
   saveTransaction,
   saveTransactionFailure,
   saveTransactionSuccess,
+  updateSettings,
+  updateSettingsFailure,
+  updateSettingsSuccess,
 } from './state.actions';
-import { selectLastFetched } from './state.selectors';
-import { Transactions, parseCsvInput, translateToDutch } from '@aws/util';
+import { selectFeature, selectLastFetched } from './state.selectors';
+import {
+  DatabaseDto,
+  PortfolioDbo,
+  matchesTransactionKey,
+  mergeTransactions,
+  parseCsvInput,
+  parseYahooCsvInput,
+  transactionToTransactionDbo,
+  translateToDutch,
+} from '@aws/util';
 
-// How long a successful transactions fetch stays "fresh"; within this window a
-// repeat getData (e.g. navigating back to a route that loads data) is served
-// from the store instead of re-hitting DynamoDB.
 const GET_DATA_CACHE_MS = 30_000;
+
+const EMPTY_TRANSACTIONS = { stock: [], dividend: [], commission: [] };
 
 @Injectable()
 export class StateEffects {
@@ -40,17 +66,21 @@ export class StateEffects {
     private readonly snackBar: MatSnackBar
   ) {}
 
-  // Surface any failure to the user as a dismissible toast. Without this, the
-  // *Failure actions are dispatched but never shown — a save could fail silently.
   public readonly showError$ = createEffect(
     () =>
       this.actions$.pipe(
         ofType(
           getDataFailure,
+          createPortfolioFailure,
+          renamePortfolioFailure,
+          deletePortfolioFailure,
           saveTransactionFailure,
           deleteTransactionFailure,
           deleteAllTransactionsFailure,
-          handleFileInputFailure
+          importDeGiroCsvFailure,
+          importYahooCsvFailure,
+          handleFileInputFailure,
+          updateSettingsFailure
         ),
         tap(({ error }) =>
           this.snackBar.open(error || 'Something went wrong', 'Dismiss', {
@@ -67,8 +97,6 @@ export class StateEffects {
       ofType(getData),
       withLatestFrom(this.store.select(selectLastFetched)),
       switchMap(([, lastFetched]) => {
-        // Serve from cache while still fresh (avoids re-fetching on every
-        // route visit that triggers getData).
         if (
           lastFetched !== null &&
           Date.now() - lastFetched < GET_DATA_CACHE_MS
@@ -76,9 +104,63 @@ export class StateEffects {
           return of(getDataCached());
         }
         return this.service.getData().pipe(
-          map(({ transactions }) => getDataSuccess({ data: transactions })),
+          map((data) => getDataSuccess({ data })),
           catchError((error: HttpErrorResponse) =>
             of(getDataFailure({ error: error.message }))
+          )
+        );
+      })
+    )
+  );
+
+  public readonly createPortfolio$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(createPortfolio),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ name }, state]) => {
+        const newPortfolio: PortfolioDbo = {
+          id: crypto.randomUUID(),
+          name,
+          transactions: EMPTY_TRANSACTIONS,
+        };
+        return this.service.setData(buildPayload(state, state.portfoliosDbo.concat(newPortfolio))).pipe(
+          map((data) => createPortfolioSuccess({ data })),
+          catchError((error: HttpErrorResponse) =>
+            of(createPortfolioFailure({ error: error.message }))
+          )
+        );
+      })
+    )
+  );
+
+  public readonly renamePortfolio$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(renamePortfolio),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ portfolioId, newName }, state]) => {
+        const updated = state.portfoliosDbo.map((p) =>
+          p.id === portfolioId ? { ...p, name: newName } : p
+        );
+        return this.service.setData(buildPayload(state, updated)).pipe(
+          map((data) => renamePortfolioSuccess({ data })),
+          catchError((error: HttpErrorResponse) =>
+            of(renamePortfolioFailure({ error: error.message }))
+          )
+        );
+      })
+    )
+  );
+
+  public readonly deletePortfolio$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(deletePortfolio),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ portfolioId }, state]) => {
+        const updated = state.portfoliosDbo.filter((p) => p.id !== portfolioId);
+        return this.service.setData(buildPayload(state, updated)).pipe(
+          map((data) => deletePortfolioSuccess({ data })),
+          catchError((error: HttpErrorResponse) =>
+            of(deletePortfolioFailure({ error: error.message }))
           )
         );
       })
@@ -88,13 +170,22 @@ export class StateEffects {
   public readonly saveTransaction$ = createEffect(() =>
     this.actions$.pipe(
       ofType(saveTransaction),
-      switchMap(({ transactions }) => {
-        return this.service.setTransactions(transactions).pipe(
-          map(({ transactions }) => {
-            return saveTransactionSuccess({
-              transactions,
-            });
-          }),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ portfolioId, transaction }, state]) => {
+        const dbo = transactionToTransactionDbo(transaction);
+        const updated = state.portfoliosDbo.map((p) => {
+          if (p.id !== portfolioId) return p;
+          const typeKey = transaction.type as 'stock' | 'dividend' | 'commission';
+          return {
+            ...p,
+            transactions: {
+              ...p.transactions,
+              [typeKey]: [...p.transactions[typeKey], dbo],
+            },
+          };
+        });
+        return this.service.setData(buildPayload(state, updated)).pipe(
+          map((data) => saveTransactionSuccess({ data })),
           catchError((error: HttpErrorResponse) =>
             of(saveTransactionFailure({ error: error.message }))
           )
@@ -106,13 +197,23 @@ export class StateEffects {
   public readonly deleteTransaction$ = createEffect(() =>
     this.actions$.pipe(
       ofType(deleteTransaction),
-      switchMap(({ newTransactions }) => {
-        return this.service.setTransactions(newTransactions).pipe(
-          map(({ transactions }) => {
-            return deleteTransactionSuccess({
-              transactions,
-            });
-          }),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ portfolioId, transactionKey }, state]) => {
+        const updated = state.portfoliosDbo.map((p) => {
+          if (p.id !== portfolioId) return p;
+          const filterOut = (txs: typeof p.transactions.stock) =>
+            txs.filter((tx) => !matchesTransactionKey(tx, transactionKey));
+          return {
+            ...p,
+            transactions: {
+              stock: filterOut(p.transactions.stock),
+              dividend: filterOut(p.transactions.dividend),
+              commission: filterOut(p.transactions.commission),
+            },
+          };
+        });
+        return this.service.setData(buildPayload(state, updated)).pipe(
+          map((data) => deleteTransactionSuccess({ data })),
           catchError((error: HttpErrorResponse) =>
             of(deleteTransactionFailure({ error: error.message }))
           )
@@ -124,42 +225,126 @@ export class StateEffects {
   public readonly deleteAllTransactions$ = createEffect(() =>
     this.actions$.pipe(
       ofType(deleteAllTransactions),
-      switchMap(() => {
-        return this.service
-          .setTransactions({ stock: [], commission: [], dividend: [] })
-          .pipe(
-            map(({ transactions }) => {
-              return deleteAllTransactionsSuccess({
-                transactions,
-              });
-            }),
-            catchError((error: HttpErrorResponse) =>
-              of(deleteAllTransactionsFailure({ error: error.message }))
-            )
-          );
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ portfolioId }, state]) => {
+        const updated = state.portfoliosDbo.map((p) =>
+          p.id === portfolioId
+            ? { ...p, transactions: EMPTY_TRANSACTIONS }
+            : p
+        );
+        return this.service.setData(buildPayload(state, updated)).pipe(
+          map((data) => deleteAllTransactionsSuccess({ data })),
+          catchError((error: HttpErrorResponse) =>
+            of(deleteAllTransactionsFailure({ error: error.message }))
+          )
+        );
       })
     )
   );
 
+  public readonly importDeGiroCsv$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(importDeGiroCsv),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ portfolioId, data, mode }, state]) => {
+        let parsed;
+        try {
+          parsed = parseCsvInput(translateToDutch(data));
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : 'Failed to parse CSV file';
+          return of(importDeGiroCsvFailure({ error: message }));
+        }
+
+        const incoming = {
+          stock: parsed.stock.map(transactionToTransactionDbo),
+          dividend: parsed.dividend.map(transactionToTransactionDbo),
+          commission: parsed.commission.map(transactionToTransactionDbo),
+        };
+
+        const updated = state.portfoliosDbo.map((p) => {
+          if (p.id !== portfolioId) return p;
+          const transactions =
+            mode === 'replace'
+              ? incoming
+              : mergeTransactions(p.transactions, incoming);
+          return { ...p, transactions };
+        });
+
+        return this.service.setData(buildPayload(state, updated)).pipe(
+          map((data) => importDeGiroCsvSuccess({ data })),
+          catchError((error: HttpErrorResponse) =>
+            of(importDeGiroCsvFailure({ error: error.message }))
+          )
+        );
+      })
+    )
+  );
+
+  public readonly importYahooCsv$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(importYahooCsv),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ portfolioId, rawRows, mode }, state]) => {
+        let incoming;
+        try {
+          incoming = parseYahooCsvInput(rawRows);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : 'Failed to parse Yahoo Finance CSV';
+          return of(importYahooCsvFailure({ error: message }));
+        }
+
+        const updated = state.portfoliosDbo.map((p) => {
+          if (p.id !== portfolioId) return p;
+          const transactions =
+            mode === 'replace' ? incoming : mergeTransactions(p.transactions, incoming);
+          return { ...p, transactions };
+        });
+
+        return this.service.setData(buildPayload(state, updated)).pipe(
+          map((data) => importYahooCsvSuccess({ data })),
+          catchError((error: HttpErrorResponse) =>
+            of(importYahooCsvFailure({ error: error.message }))
+          )
+        );
+      })
+    )
+  );
+
+  // Legacy handleFileInput: applies DeGiro CSV to the "default" portfolio in
+  // replace mode. Kept for backward compat with existing dispatch sites.
   public readonly handleFileInput$ = createEffect(() =>
     this.actions$.pipe(
       ofType(handleFileInput),
-      switchMap(({ data }) => {
-        let newTransactions: Transactions;
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ data }, state]) => {
+        let parsed;
         try {
-          newTransactions = parseCsvInput(translateToDutch(data));
+          parsed = parseCsvInput(translateToDutch(data));
         } catch (error) {
           const message =
             error instanceof Error ? error.message : 'Failed to parse CSV file';
           return of(handleFileInputFailure({ error: message }));
         }
 
-        return this.service.setTransactions(newTransactions).pipe(
-          map(({ transactions }) => {
-            return handleFileInputSuccess({
-              transactions,
-            });
-          }),
+        const incoming = {
+          stock: parsed.stock.map(transactionToTransactionDbo),
+          dividend: parsed.dividend.map(transactionToTransactionDbo),
+          commission: parsed.commission.map(transactionToTransactionDbo),
+        };
+
+        // Find "default" portfolio or first one.
+        const targetId =
+          state.portfoliosDbo.find((p) => p.id === 'default')?.id ??
+          state.portfoliosDbo[0]?.id;
+
+        const updated = state.portfoliosDbo.map((p) =>
+          p.id === targetId ? { ...p, transactions: incoming } : p
+        );
+
+        return this.service.setData(buildPayload(state, updated)).pipe(
+          map((d) => handleFileInputSuccess({ data: d })),
           catchError((error: HttpErrorResponse) =>
             of(handleFileInputFailure({ error: error.message }))
           )
@@ -167,4 +352,32 @@ export class StateEffects {
       })
     )
   );
+
+  public readonly updateSettings$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(updateSettings),
+      withLatestFrom(this.store.select(selectFeature)),
+      switchMap(([{ settings }, state]) => {
+        return this.service
+          .setData({ portfolios: state.portfoliosDbo, settings, schemaVersion: 2 })
+          .pipe(
+            map((data) => updateSettingsSuccess({ data })),
+            catchError((error: HttpErrorResponse) =>
+              of(updateSettingsFailure({ error: error.message }))
+            )
+          );
+      })
+    )
+  );
+}
+
+function buildPayload(
+  state: { portfoliosDbo: PortfolioDbo[]; settings: { baseCurrency: string } },
+  portfolios: PortfolioDbo[]
+): DatabaseDto {
+  return {
+    portfolios,
+    settings: state.settings,
+    schemaVersion: 2,
+  };
 }

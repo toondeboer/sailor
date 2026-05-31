@@ -1,0 +1,20 @@
+.portfolios-layout {
+  display: flex;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+.portfolios-sidebar {
+  width: 260px;
+  min-width: 260px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.portfolios-main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

@@ -74,14 +74,40 @@ export type Transaction = {
   ticker: string;
   type: TransactionType;
   date: Date;
+  time?: string;
   amount: number;
   value: number;
   currency: string;
 };
 
-export type DatabaseDto = {
+export type TransactionKey = {
+  type: TransactionType;
+  ticker: string;
+  date: string;
+  time?: string;
+  value: number;
+};
+
+// Legacy v1 shape — kept for schema migration only.
+export type DatabaseDtoV1 = {
   startDate: string;
   transactions: TransactionsDbo;
+};
+
+export type UserSettingsDbo = {
+  baseCurrency: string;
+};
+
+export type PortfolioDbo = {
+  id: string;
+  name: string;
+  transactions: TransactionsDbo;
+};
+
+export type DatabaseDto = {
+  portfolios: PortfolioDbo[];
+  settings: UserSettingsDbo;
+  schemaVersion: 2;
 };
 
 export type TransactionsDbo = {
@@ -94,6 +120,7 @@ export type TransactionDbo = {
   ticker: string;
   type: string;
   date: string;
+  time?: string;
   amount: number;
   value: number;
   currency: string;
@@ -143,6 +170,7 @@ export type Ticker = {
 
 export type CsvInput = {
   Datum: string;
+  Tijd?: string;
   Product: string;
   Omschrijving: string;
   '': string;
@@ -150,6 +178,7 @@ export type CsvInput = {
 
 export type CsvInputEnglish = {
   Date: string;
+  Time?: string;
   Product: string;
   Description: string;
   '': string;

@@ -23,6 +23,7 @@ export function translateToDutch(csv: CsvInput | CsvInputEnglish): CsvInput {
     return csv.map((row) => ({
       Omschrijving: row.Description,
       Datum: row.Date,
+      Tijd: (row as CsvInputEnglish[number] & { Time?: string }).Time,
       '': row[''],
       Product: row.Product,
     }));
@@ -51,15 +52,19 @@ export function parseCsvInput(csv: CsvInput): Transactions {
     const product = row.Product;
     const ticker = getTickerFromGiroProduct(product);
 
+    const parsedDate = new Date(
+      parseInt(row.Datum.split('-')[2]),
+      parseInt(row.Datum.split('-')[1]) - 1,
+      parseInt(row.Datum.split('-')[0])
+    );
+    const time = row.Tijd?.trim() || undefined;
+
     if (row.Omschrijving.startsWith('Koop ')) {
       stock.push({
         ticker,
         type: 'stock',
-        date: new Date(
-          parseInt(row.Datum.split('-')[2]),
-          parseInt(row.Datum.split('-')[1]) - 1,
-          parseInt(row.Datum.split('-')[0])
-        ),
+        date: parsedDate,
+        time,
         amount: parseFloat(
           row.Omschrijving.replace('Koop ', '').split(' @')[0]
         ),
@@ -73,11 +78,8 @@ export function parseCsvInput(csv: CsvInput): Transactions {
       commission.push({
         ticker,
         type: 'commission',
-        date: new Date(
-          parseInt(row.Datum.split('-')[2]),
-          parseInt(row.Datum.split('-')[1]) - 1,
-          parseInt(row.Datum.split('-')[0])
-        ),
+        date: parsedDate,
+        time,
         amount: 1,
         value: Math.abs(parseFloat(row[''])),
         currency: 'EUR',
@@ -87,11 +89,8 @@ export function parseCsvInput(csv: CsvInput): Transactions {
       commission.push({
         ticker,
         type: 'commission',
-        date: new Date(
-          parseInt(row.Datum.split('-')[2]),
-          parseInt(row.Datum.split('-')[1]) - 1,
-          parseInt(row.Datum.split('-')[0])
-        ),
+        date: parsedDate,
+        time,
         amount: 1,
         value: -1 * Math.abs(parseFloat(row[''])),
         currency: 'EUR',
@@ -101,11 +100,8 @@ export function parseCsvInput(csv: CsvInput): Transactions {
       dividend.push({
         ticker,
         type: 'dividend',
-        date: new Date(
-          parseInt(row.Datum.split('-')[2]),
-          parseInt(row.Datum.split('-')[1]) - 1,
-          parseInt(row.Datum.split('-')[0])
-        ),
+        date: parsedDate,
+        time,
         amount: 1,
         value: Math.abs(parseFloat(row[''])),
         currency: 'EUR',

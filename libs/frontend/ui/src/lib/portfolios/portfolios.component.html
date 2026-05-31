@@ -1,0 +1,20 @@
+<div class="portfolios-layout" *ngIf="{ portfolios: portfolios$ | async, state: state$ | async } as vm">
+  <aside class="portfolios-sidebar">
+    <aws-portfolio-list
+      [portfolios]="vm.portfolios ?? []"
+      [selectedPortfolioId]="selectedPortfolioId"
+      (selectPortfolio)="onSelectPortfolio($event)"
+      (createPortfolio)="onCreatePortfolio()"
+      (renamePortfolio)="onRenamePortfolio($event)"
+      (deletePortfolio)="onDeletePortfolio($event)"
+    ></aws-portfolio-list>
+  </aside>
+
+  <main class="portfolios-main">
+    <aws-portfolio-detail
+      [portfolio]="getSelectedPortfolio(vm.portfolios ?? [])"
+      [stocks]="vm.state?.stocks ?? {}"
+      (importCsv)="onImportCsv($event)"
+    ></aws-portfolio-detail>
+  </main>
+</div>

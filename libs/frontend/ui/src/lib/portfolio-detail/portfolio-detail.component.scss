@@ -1,0 +1,49 @@
+.portfolio-detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.detail-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.import-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.no-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  opacity: 0.4;
+  gap: 16px;
+}
+
+.no-selection-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+}

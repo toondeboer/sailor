@@ -5,7 +5,6 @@ import {
   DYNAMODB_TIMEOUT_MS,
   parseDatabaseDto,
   retryWithBackoff,
-  Transactions,
 } from '@aws/util';
 import { map, Observable, timeout } from 'rxjs';
 
@@ -26,13 +25,11 @@ export class StateService {
     );
   }
 
-  public setTransactions(transactions: Transactions): Observable<DatabaseDto> {
+  public setData(payload: DatabaseDto): Observable<DatabaseDto> {
     return this.http
-      .put<unknown>(`${this.environment.dynamoDBLambdaUrl}`, { transactions })
+      .put<unknown>(`${this.environment.dynamoDBLambdaUrl}`, payload)
       .pipe(
         timeout(DYNAMODB_TIMEOUT_MS),
-        // The PUT is an idempotent "set transactions = ...", so retrying a
-        // transient failure can't double-write.
         retryWithBackoff(),
         map((response) => parseDatabaseDto(response))
       );

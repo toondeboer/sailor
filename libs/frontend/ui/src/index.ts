@@ -2,4 +2,6 @@ export * from './lib/ui.module';
 export * from './lib/dashboard/dashboard.component';
 export * from './lib/page-wrapper/page-wrapper.component';
 export * from './lib/transactions/transactions.component';
+export * from './lib/portfolios/portfolios.component';
+export * from './lib/settings/settings.component';
 export * from './lib/landing-page/landing-page.component';

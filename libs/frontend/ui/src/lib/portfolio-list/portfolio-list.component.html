@@ -1,0 +1,44 @@
+<div class="portfolio-list">
+  <div class="list-header">
+    <h2 class="list-title">Portfolios</h2>
+    <button mat-icon-button (click)="createPortfolio.emit()" matTooltip="New portfolio">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+
+  <div class="portfolio-items">
+    <div
+      *ngFor="let portfolio of portfolios"
+      class="portfolio-item"
+      [class.selected]="portfolio.id === selectedPortfolioId"
+      (click)="selectPortfolio.emit(portfolio.id)"
+    >
+      <div class="portfolio-info">
+        <div class="portfolio-name">{{ portfolio.name }}</div>
+        <div class="portfolio-count">{{ transactionCount(portfolio) }} transactions</div>
+      </div>
+      <div class="portfolio-actions" (click)="$event.stopPropagation()">
+        <button
+          mat-icon-button
+          class="action-btn"
+          (click)="renamePortfolio.emit(portfolio)"
+          matTooltip="Rename"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          class="action-btn delete-btn"
+          (click)="deletePortfolio.emit(portfolio)"
+          matTooltip="Delete"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="portfolios.length === 0" class="empty-state">
+      No portfolios yet. Create one to get started.
+    </div>
+  </div>
+</div>
