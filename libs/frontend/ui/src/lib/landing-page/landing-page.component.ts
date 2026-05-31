@@ -70,7 +70,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
       number: 1,
       title: 'Set Sail',
       description:
-        'Create your account in under 30 seconds. sAIlor handles the authentication so you can focus on your investments.',
+        'Create your account in under 30 seconds. sailor handles the authentication so you can focus on your investments.',
     },
     {
       number: 2,
