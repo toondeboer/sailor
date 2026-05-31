@@ -1,0 +1,49 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+.tickers-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  @include serif-heading;
+  font-size: 1.25rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: transparent;
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-sm;
+  color: $color-muted;
+  cursor: pointer;
+  font-family: $font-sans;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  text-transform: uppercase;
+  transition: $transition-base;
+
+  &:hover {
+    border-color: $color-gold;
+    color: $color-cream;
+  }
+
+  &.active {
+    background: rgba(201, 168, 76, 0.12);
+    border-color: $color-gold;
+    color: $color-gold;
+  }
+}

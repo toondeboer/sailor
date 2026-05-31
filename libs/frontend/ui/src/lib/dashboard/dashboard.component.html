@@ -1,10 +1,21 @@
-<div class="grid" *ngIf="state$ | async as state">
-  <aws-summary [summary]="state.summary"></aws-summary>
+<div class="page" *ngIf="state$ | async as state">
 
-  <aws-active-tickers
-    *ngIf="state.summary.portfolioValue > 0"
-    [dates]="state.dates"
-    [stocks]="state.stocks"
-  ></aws-active-tickers>
+  <header class="page-header">
+    <h1 class="page-title">Portfolio</h1>
+    <p class="page-subtitle" *ngIf="state.summary.startDate">
+      Since {{ state.summary.startDate | date : 'MMM yyyy' }}
+    </p>
+  </header>
+
+  <section class="page-section">
+    <aws-summary [summary]="state.summary"></aws-summary>
+  </section>
+
+  <section class="page-section" *ngIf="state.summary.portfolioValue > 0">
+    <aws-active-tickers
+      [dates]="state.dates"
+      [stocks]="state.stocks"
+    ></aws-active-tickers>
+  </section>
 
 </div>

@@ -1,10 +1,15 @@
-<div>
-  <div>Select active tickers</div>
-  <div *ngFor="let ticker of tickers">
-    <label>
-    <input type="checkbox"  [checked]="activeStocks.includes(ticker)"   (change)="onCheckboxChange(ticker, $event )" />
-      {{ticker}}
-    </label>
+<div class="tickers-header">
+  <h2 class="section-title">Holdings</h2>
+  <div class="chips">
+    <button
+      *ngFor="let ticker of tickers"
+      class="chip"
+      [class.active]="activeStocks.includes(ticker)"
+      (click)="toggleTicker(ticker)"
+      type="button"
+    >
+      {{ ticker }}
+    </button>
   </div>
 </div>
 

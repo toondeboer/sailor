@@ -31,12 +31,11 @@ export class ActiveTickersComponent implements OnChanges {
     }
   }
 
-  onCheckboxChange(value: string, event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.checked) {
-      this.activeStocks.push(value);
+  toggleTicker(ticker: string) {
+    if (this.activeStocks.includes(ticker)) {
+      this.activeStocks = this.activeStocks.filter((v) => v !== ticker);
     } else {
-      this.activeStocks = this.activeStocks.filter((v) => v !== value);
+      this.activeStocks = [...this.activeStocks, ticker];
     }
     this.activeChartData = this.getActiveChartData();
   }
