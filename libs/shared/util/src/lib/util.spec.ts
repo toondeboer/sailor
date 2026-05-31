@@ -416,6 +416,44 @@ describe('transactionsDboToStocks / getStartDate / getCurrencies', () => {
     const stocks = transactionsDboToStocks(input);
     expect(getCurrencies(stocks)).toEqual(['EUR=X']);
   });
+
+  it('resolves GBP to GBPEUR=X', () => {
+    const gbpInput: TransactionsDbo = {
+      stock: [dbo('2023-01-10', 10, 100, 'stock', 'GBP')],
+      dividend: [],
+      commission: [],
+    };
+    const stocks = transactionsDboToStocks(gbpInput);
+    expect(stocks['VUSA.AS'].currency).toEqual({ value: 'GBP', yahooTicker: 'GBPEUR=X' });
+    expect(getCurrencies(stocks)).toEqual(['GBPEUR=X']);
+  });
+
+  it('resolves GBp (pence) to GBPEUR=X with fxMultiplier 0.01', () => {
+    const gbpInput: TransactionsDbo = {
+      stock: [dbo('2023-01-10', 1000, 5000, 'stock', 'GBp')],
+      dividend: [],
+      commission: [],
+    };
+    const stocks = transactionsDboToStocks(gbpInput);
+    expect(stocks['VUSA.AS'].currency).toEqual({
+      value: 'GBp',
+      yahooTicker: 'GBPEUR=X',
+      fxMultiplier: 0.01,
+    });
+  });
+
+  it('getCurrencies deduplicates GBP and GBp under the same GBPEUR=X ticker', () => {
+    const mixed: TransactionsDbo = {
+      stock: [
+        dbo('2023-01-10', 1, 100, 'stock', 'GBP'),
+        { ticker: 'LLOY.L', type: 'stock', date: '2023-01-11', amount: 100, value: 5000, currency: 'GBp' },
+      ],
+      dividend: [],
+      commission: [],
+    };
+    const stocks = transactionsDboToStocks(mixed);
+    expect(getCurrencies(stocks)).toEqual(['GBPEUR=X']);
+  });
 });
 
 describe('yahooObjectToTicker', () => {

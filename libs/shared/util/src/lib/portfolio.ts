@@ -21,32 +21,56 @@ import {
 } from './util';
 
 /**
- * Returns an array of FX rates aligned to the given portfolio dates by carrying
- * forward the last known rate. Defaults to 1 until the first FX data point
- * arrives, so missing data produces no conversion rather than NaN.
+ * Returns an array of FX rates aligned to the given portfolio dates using the
+ * nearest available rate (forward fill, then backward fill for dates before the
+ * first data point). Treats zero values as missing, matching how Yahoo Finance
+ * omits rates on weekends and holidays.
+ *
+ * Throws when the FX ticker has no valid values at all so callers can surface
+ * the error to the user rather than silently producing wrong numbers.
  */
 function getFxRates(dates: Date[], fxTicker: Ticker): number[] {
-  const rates: number[] = [];
+  const rates = new Array<number>(dates.length).fill(NaN);
   let fxIdx = 0;
-  let lastKnownRate = 1;
+  let lastKnownRate = NaN;
 
-  for (const date of dates) {
+  // Forward pass: carry the last known rate forward.
+  for (let i = 0; i < dates.length; i++) {
     while (
       fxIdx < fxTicker.dates.length &&
-      !isSameDay(fxTicker.dates[fxIdx], date) &&
-      fxTicker.dates[fxIdx] < date
+      !isSameDay(fxTicker.dates[fxIdx], dates[i]) &&
+      fxTicker.dates[fxIdx] < dates[i]
     ) {
       const val = fxTicker.values[fxIdx];
       if (!isNaN(val) && val > 0) lastKnownRate = val;
       fxIdx++;
     }
-    if (fxIdx < fxTicker.dates.length && isSameDay(fxTicker.dates[fxIdx], date)) {
+    if (fxIdx < fxTicker.dates.length && isSameDay(fxTicker.dates[fxIdx], dates[i])) {
       const val = fxTicker.values[fxIdx];
       if (!isNaN(val) && val > 0) lastKnownRate = val;
       fxIdx++;
     }
-    rates.push(lastKnownRate);
+    if (!isNaN(lastKnownRate)) rates[i] = lastKnownRate;
   }
+
+  // Find the first valid rate to fill any NaNs before it.
+  let firstKnown = NaN;
+  for (let i = 0; i < rates.length; i++) {
+    if (!isNaN(rates[i])) { firstKnown = rates[i]; break; }
+  }
+
+  if (isNaN(firstKnown)) {
+    throw new Error(
+      `No FX rate data available for ${fxTicker.name}. ` +
+      `Ensure the symbol is valid and Yahoo Finance data has loaded.`
+    );
+  }
+
+  // Backward pass: fill any NaNs at the start from the first known rate.
+  for (let i = 0; i < rates.length && isNaN(rates[i]); i++) {
+    rates[i] = firstKnown;
+  }
+
   return rates;
 }
 
@@ -236,11 +260,14 @@ export function computePortfolioState(
 
     if (fxTicker) {
       const fxRates = getFxRates(dates, fxTicker);
-      portfolioValues = multiplyLists(portfolioValuesNative, fxRates);
-      investedForProfit = multiplyLists(stock.chartData.stock.aggregatedValues, fxRates);
-      commissionForProfit = multiplyLists(stock.chartData.commission.aggregatedValues, fxRates);
-      const lastFxRate = getMostRecentValueFromList(fxRates).value;
-      currentSharePrice = currentSharePrice * lastFxRate;
+      // fxMultiplier handles sub-unit currencies: GBp (pence) = 0.01 × GBP.
+      const m = stock.currency.fxMultiplier ?? 1;
+      const scaledRates = m === 1 ? fxRates : fxRates.map(r => r * m);
+      portfolioValues = multiplyLists(portfolioValuesNative, scaledRates);
+      investedForProfit = multiplyLists(stock.chartData.stock.aggregatedValues, scaledRates);
+      commissionForProfit = multiplyLists(stock.chartData.commission.aggregatedValues, scaledRates);
+      const lastScaledRate = getMostRecentValueFromList(scaledRates).value;
+      currentSharePrice = currentSharePrice * lastScaledRate;
     }
 
     aggregatedPortfolioValues =

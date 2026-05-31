@@ -52,16 +52,26 @@ export const selectVisiblePortfoliosDbo = createSelector(
     ids === 'all' ? portfolios : portfolios.filter((p) => ids.includes(p.id))
 );
 
-// Aggregate portfolio state — merges all visible portfolios' transactions and
-// runs computePortfolioState over them. This is the view-model used by the
-// dashboard and as the backward-compat selectState.
-const selectAggregatePortfolio = createSelector(
+// Aggregate portfolio with a separate fxError so the error can be surfaced
+// without crashing the selector chain.
+const selectAggregatePortfolioResult = createSelector(
   selectVisiblePortfoliosDbo,
   selectTickers,
   selectBaseCurrency,
   (portfolios, tickers, baseCurrency) => {
     const merged = mergeTransactionsDbo(portfolios.map((p) => p.transactions));
-    return computePortfolioState(merged, tickers, baseCurrency);
+    try {
+      return {
+        portfolio: computePortfolioState(merged, tickers, baseCurrency),
+        fxError: null as string | null,
+      };
+    } catch (err) {
+      // Fall back to native-currency values and report the FX error to the UI.
+      return {
+        portfolio: computePortfolioState(merged, tickers),
+        fxError: err instanceof Error ? err.message : 'FX conversion failed',
+      };
+    }
   }
 );
 
@@ -70,14 +80,24 @@ export const selectAllPortfolioStates = createSelector(
   selectPortfoliosDbo,
   selectTickers,
   selectBaseCurrency,
-  (portfolios, tickers, baseCurrency) => computeAllPortfolios(portfolios, tickers, baseCurrency)
+  (portfolios, tickers, baseCurrency) => {
+    try {
+      return computeAllPortfolios(portfolios, tickers, baseCurrency);
+    } catch {
+      return computeAllPortfolios(portfolios, tickers);
+    }
+  }
 );
 
 // Public view-model — same shape as before (transactions, stocks, dates, summary,
 // currencies) plus loading/error. Backward compat for existing components.
 export const selectState = createSelector(
-  selectAggregatePortfolio,
+  selectAggregatePortfolioResult,
   selectLoading,
   selectError,
-  (portfolio, loading, error) => ({ ...portfolio, loading, error })
+  ({ portfolio, fxError }, loading, error) => ({
+    ...portfolio,
+    loading,
+    error: error || fxError,
+  })
 );
