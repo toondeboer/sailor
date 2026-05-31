@@ -12,11 +12,67 @@ import {
   getStartDate,
   getTransactionAmountsAndValues,
   getYieldPerYear,
+  isSameDay,
+  multiplyLists,
   subtractLists,
   transactionsDboToStocks,
   transactionsDboToTransactions,
   updateDividends,
 } from './util';
+
+/**
+ * Returns an array of FX rates aligned to the given portfolio dates using the
+ * nearest available rate (forward fill, then backward fill for dates before the
+ * first data point). Treats zero values as missing, matching how Yahoo Finance
+ * omits rates on weekends and holidays.
+ *
+ * Throws when the FX ticker has no valid values at all so callers can surface
+ * the error to the user rather than silently producing wrong numbers.
+ */
+function getFxRates(dates: Date[], fxTicker: Ticker): number[] {
+  const rates = new Array<number>(dates.length).fill(NaN);
+  let fxIdx = 0;
+  let lastKnownRate = NaN;
+
+  // Forward pass: carry the last known rate forward.
+  for (let i = 0; i < dates.length; i++) {
+    while (
+      fxIdx < fxTicker.dates.length &&
+      !isSameDay(fxTicker.dates[fxIdx], dates[i]) &&
+      fxTicker.dates[fxIdx] < dates[i]
+    ) {
+      const val = fxTicker.values[fxIdx];
+      if (!isNaN(val) && val > 0) lastKnownRate = val;
+      fxIdx++;
+    }
+    if (fxIdx < fxTicker.dates.length && isSameDay(fxTicker.dates[fxIdx], dates[i])) {
+      const val = fxTicker.values[fxIdx];
+      if (!isNaN(val) && val > 0) lastKnownRate = val;
+      fxIdx++;
+    }
+    if (!isNaN(lastKnownRate)) rates[i] = lastKnownRate;
+  }
+
+  // Find the first valid rate to fill any NaNs before it.
+  let firstKnown = NaN;
+  for (let i = 0; i < rates.length; i++) {
+    if (!isNaN(rates[i])) { firstKnown = rates[i]; break; }
+  }
+
+  if (isNaN(firstKnown)) {
+    throw new Error(
+      `No FX rate data available for ${fxTicker.name}. ` +
+      `Ensure the symbol is valid and Yahoo Finance data has loaded.`
+    );
+  }
+
+  // Backward pass: fill any NaNs at the start from the first known rate.
+  for (let i = 0; i < rates.length && isNaN(rates[i]); i++) {
+    rates[i] = firstKnown;
+  }
+
+  return rates;
+}
 
 export interface PortfolioState {
   transactions: Transactions;
@@ -59,7 +115,8 @@ export function createInitialSummary(): Summary {
  */
 export function computePortfolioState(
   transactionsDbo: TransactionsDbo,
-  tickers: { [ticker: string]: Ticker }
+  tickers: { [ticker: string]: Ticker },
+  displayCurrency?: string
 ): PortfolioState {
   const baseStocks = transactionsDboToStocks(transactionsDbo);
   const transactions = transactionsDboToTransactions(transactionsDbo);
@@ -180,11 +237,39 @@ export function computePortfolioState(
       continue;
     }
 
-    const portfolioValues = getPortfolioValues(
+    const portfolioValuesNative = getPortfolioValues(
       dates,
       stock.chartData.stock.aggregatedAmounts,
       ticker
     );
+
+    // Apply FX conversion when the stock is denominated in a currency other
+    // than the display currency and a matching FX ticker is available.
+    const fxSymbol = stock.currency.yahooTicker;
+    const fxTicker =
+      displayCurrency &&
+      stock.currency.value !== displayCurrency &&
+      fxSymbol
+        ? tickers[fxSymbol]
+        : undefined;
+
+    let portfolioValues = portfolioValuesNative;
+    let investedForProfit = stock.chartData.stock.aggregatedValues;
+    let commissionForProfit = stock.chartData.commission.aggregatedValues;
+    let currentSharePrice = getMostRecentValueFromList(ticker.values).value;
+
+    if (fxTicker) {
+      const fxRates = getFxRates(dates, fxTicker);
+      // fxMultiplier handles sub-unit currencies: GBp (pence) = 0.01 × GBP.
+      const m = stock.currency.fxMultiplier ?? 1;
+      const scaledRates = m === 1 ? fxRates : fxRates.map(r => r * m);
+      portfolioValues = multiplyLists(portfolioValuesNative, scaledRates);
+      investedForProfit = multiplyLists(stock.chartData.stock.aggregatedValues, scaledRates);
+      commissionForProfit = multiplyLists(stock.chartData.commission.aggregatedValues, scaledRates);
+      const lastScaledRate = getMostRecentValueFromList(scaledRates).value;
+      currentSharePrice = currentSharePrice * lastScaledRate;
+    }
+
     aggregatedPortfolioValues =
       aggregatedPortfolioValues.length > 0
         ? addLists(aggregatedPortfolioValues, portfolioValues)
@@ -193,8 +278,8 @@ export function computePortfolioState(
     portfolioValuesSummary += portfolioValue;
 
     const profit = subtractLists(
-      subtractLists(portfolioValues, stock.chartData.stock.aggregatedValues),
-      stock.chartData.commission.aggregatedValues
+      subtractLists(portfolioValues, investedForProfit),
+      commissionForProfit
     );
     aggregatedProfit =
       aggregatedProfit.length > 0
@@ -226,7 +311,7 @@ export function computePortfolioState(
       summary: {
         ...stock.summary,
         portfolioValue,
-        currentSharePrice: getMostRecentValueFromList(ticker.values).value,
+        currentSharePrice,
         dailyReturn,
         weeklyReturn,
         monthlyReturn,
@@ -266,12 +351,13 @@ export function computePortfolioState(
  */
 export function computeAllPortfolios(
   portfoliosDbo: PortfolioDbo[],
-  tickers: { [ticker: string]: Ticker }
+  tickers: { [ticker: string]: Ticker },
+  baseCurrency?: string
 ): { [id: string]: PortfolioComputedState } {
   const result: { [id: string]: PortfolioComputedState } = {};
   for (const portfolio of portfoliosDbo) {
     result[portfolio.id] = {
-      ...computePortfolioState(portfolio.transactions, tickers),
+      ...computePortfolioState(portfolio.transactions, tickers, baseCurrency),
       portfolioId: portfolio.id,
       portfolioName: portfolio.name,
     };

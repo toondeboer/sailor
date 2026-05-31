@@ -97,4 +97,246 @@ describe('computePortfolioState', () => {
     expect(result.summary.totalInvested).toBe(0);
     expect(result.summary.portfolioValue).toBe(0);
   });
+
+  it('applies FX conversion when displayCurrency differs from stock currency', () => {
+    const usdDbo: TransactionsDbo = {
+      stock: [
+        {
+          ticker: 'AAPL',
+          type: 'stock',
+          date: '2023-01-10',
+          amount: 1,
+          value: 100,
+          currency: 'USD',
+        },
+      ],
+      dividend: [],
+      commission: [],
+    };
+
+    const dates = getDailyDates(
+      getStartDate(transactionsDboToStocks(usdDbo)),
+      new Date()
+    );
+
+    const stockTicker: Ticker = {
+      name: 'AAPL',
+      currency: 'USD',
+      dates,
+      values: dates.map(() => 200),
+      dividends: [],
+    };
+
+    // EUR=X represents the USD→EUR conversion rate. A rate of 0.9 means
+    // 1 USD = 0.9 EUR, so a $200 position becomes €180.
+    const fxTicker: Ticker = {
+      name: 'EUR=X',
+      currency: 'EUR',
+      dates,
+      values: dates.map(() => 0.9),
+      dividends: [],
+    };
+
+    const result = computePortfolioState(
+      usdDbo,
+      { AAPL: stockTicker, 'EUR=X': fxTicker },
+      'EUR'
+    );
+
+    // 1 share * $200 * 0.9 fx = €180
+    expect(result.summary.portfolioValue).toBeCloseTo(180);
+    expect(result.stocks['AAPL'].summary.portfolioValue).toBeCloseTo(180);
+    expect(result.stocks['AAPL'].summary.currentSharePrice).toBeCloseTo(180);
+  });
+
+  it('skips FX conversion when displayCurrency matches stock currency', () => {
+    const eurDbo: TransactionsDbo = {
+      stock: [
+        {
+          ticker: 'VUSA.AS',
+          type: 'stock',
+          date: '2023-01-10',
+          amount: 2,
+          value: 200,
+          currency: 'EUR',
+        },
+      ],
+      dividend: [],
+      commission: [],
+    };
+
+    const dates = getDailyDates(
+      getStartDate(transactionsDboToStocks(eurDbo)),
+      new Date()
+    );
+
+    const stockTicker: Ticker = {
+      name: 'VUSA.AS',
+      currency: 'EUR',
+      dates,
+      values: dates.map(() => 150),
+      dividends: [],
+    };
+
+    const result = computePortfolioState(
+      eurDbo,
+      { 'VUSA.AS': stockTicker },
+      'EUR'
+    );
+
+    // No FX applied: 2 shares * €150 = €300
+    expect(result.summary.portfolioValue).toBe(300);
+  });
+
+  it('backward-fills FX rate for portfolio dates before the first FX data point', () => {
+    const usdDbo: TransactionsDbo = {
+      stock: [
+        {
+          ticker: 'AAPL',
+          type: 'stock',
+          date: '2023-01-10',
+          amount: 1,
+          value: 100,
+          currency: 'USD',
+        },
+      ],
+      dividend: [],
+      commission: [],
+    };
+
+    const dates = getDailyDates(
+      getStartDate(transactionsDboToStocks(usdDbo)),
+      new Date()
+    );
+
+    const stockTicker: Ticker = {
+      name: 'AAPL',
+      currency: 'USD',
+      dates,
+      values: dates.map(() => 200),
+      dividends: [],
+    };
+
+    // FX data starts 5 days after the portfolio start: the first 5 dates should
+    // still get the same rate via the backward fill.
+    const fxStartOffset = 5;
+    const fxTicker: Ticker = {
+      name: 'EUR=X',
+      currency: 'EUR',
+      dates: dates.slice(fxStartOffset),
+      values: dates.slice(fxStartOffset).map(() => 0.9),
+      dividends: [],
+    };
+
+    const result = computePortfolioState(
+      usdDbo,
+      { AAPL: stockTicker, 'EUR=X': fxTicker },
+      'EUR'
+    );
+
+    // All portfolio values should use rate 0.9 — backward fill covers the gap.
+    expect(result.summary.portfolioValue).toBeCloseTo(180);
+    const portfolioValues = result.stocks['AAPL'].chartData.portfolioValues;
+    // dates[0] is one day before the transaction (0 shares); dates[1] is when
+    // the 1-share transaction lands. getDailyDates starts one day before start.
+    expect(portfolioValues[1]).toBeCloseTo(200 * 0.9);
+  });
+
+  it('throws when FX ticker has no valid data', () => {
+    const usdDbo: TransactionsDbo = {
+      stock: [
+        {
+          ticker: 'AAPL',
+          type: 'stock',
+          date: '2023-01-10',
+          amount: 1,
+          value: 100,
+          currency: 'USD',
+        },
+      ],
+      dividend: [],
+      commission: [],
+    };
+
+    const dates = getDailyDates(
+      getStartDate(transactionsDboToStocks(usdDbo)),
+      new Date()
+    );
+
+    const stockTicker: Ticker = {
+      name: 'AAPL',
+      currency: 'USD',
+      dates,
+      values: dates.map(() => 200),
+      dividends: [],
+    };
+
+    const emptyFxTicker: Ticker = {
+      name: 'EUR=X',
+      currency: 'EUR',
+      dates: [],
+      values: [],
+      dividends: [],
+    };
+
+    expect(() =>
+      computePortfolioState(
+        usdDbo,
+        { AAPL: stockTicker, 'EUR=X': emptyFxTicker },
+        'EUR'
+      )
+    ).toThrow('No FX rate data available for EUR=X');
+  });
+
+  it('applies GBp (pence) fxMultiplier: divides by 100 before EUR conversion', () => {
+    const gbpDbo: TransactionsDbo = {
+      stock: [
+        {
+          ticker: 'LLOY.L',
+          type: 'stock',
+          date: '2023-01-10',
+          amount: 100,
+          value: 5000, // 5000 pence = £50
+          currency: 'GBp',
+        },
+      ],
+      dividend: [],
+      commission: [],
+    };
+
+    const dates = getDailyDates(
+      getStartDate(transactionsDboToStocks(gbpDbo)),
+      new Date()
+    );
+
+    // Price in pence: 60p per share
+    const stockTicker: Ticker = {
+      name: 'LLOY.L',
+      currency: 'GBp',
+      dates,
+      values: dates.map(() => 60),
+      dividends: [],
+    };
+
+    // GBPEUR=X: 1 GBP = 1.15 EUR
+    const fxTicker: Ticker = {
+      name: 'GBPEUR=X',
+      currency: 'EUR',
+      dates,
+      values: dates.map(() => 1.15),
+      dividends: [],
+    };
+
+    const result = computePortfolioState(
+      gbpDbo,
+      { 'LLOY.L': stockTicker, 'GBPEUR=X': fxTicker },
+      'EUR'
+    );
+
+    // 100 shares * 60p = 6000p = £60; £60 * 1.15 = €69
+    expect(result.summary.portfolioValue).toBeCloseTo(69);
+    expect(result.stocks['LLOY.L'].summary.portfolioValue).toBeCloseTo(69);
+    // Current share price: 60p = £0.60 * 1.15 = €0.69
+    expect(result.stocks['LLOY.L'].summary.currentSharePrice).toBeCloseTo(0.69);
+  });
 });

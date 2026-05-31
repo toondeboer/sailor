@@ -115,18 +115,21 @@ export function transactionsDboToTransactions(
 
 function getCurrency(currency: string): {
   value: string;
-  yahooTicker: string | undefined;
+  yahooTicker?: string;
+  fxMultiplier?: number;
 } {
-  const yahooTicker = (() => {
-    switch (currency) {
-      case 'USD':
-        return 'EUR=X';
-      case 'EUR':
-      default:
-        return undefined;
-    }
-  })();
-  return { value: currency, yahooTicker };
+  switch (currency) {
+    case 'USD':
+      return { value: 'USD', yahooTicker: 'EUR=X' };
+    case 'GBP':
+      return { value: 'GBP', yahooTicker: 'GBPEUR=X' };
+    case 'GBp':
+      // Yahoo prices UK stocks in pence; divide by 100 after applying the GBP→EUR rate.
+      return { value: 'GBp', yahooTicker: 'GBPEUR=X', fxMultiplier: 0.01 };
+    case 'EUR':
+    default:
+      return { value: currency };
+  }
 }
 
 export function transactionsDboToStocks(transactions: TransactionsDbo): {
