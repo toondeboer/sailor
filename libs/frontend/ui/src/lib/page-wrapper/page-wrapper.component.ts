@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import {
   MatSidenav,
   MatSidenavContainer,
@@ -28,7 +28,6 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./page-wrapper.component.scss'],
   imports: [
     RouterOutlet,
-    RouterLink,
     MatSidenavContent,
     MatSidenavContainer,
     ScrollingTextComponent,

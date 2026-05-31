@@ -1,181 +1,60 @@
-<div *ngIf="state$ | async as state" class="scroll-container">
+<div *ngIf="state$ | async as state" class="ticker-viewport">
   <ng-container *ngIf="state.summary.totalReturn.absolute !== 0">
-    <div *ngIf="state.summary.totalReturn as return" class="scroll-text">
-      <div>Portfolio value:</div>
-      <div class="bold">
-        {{ state.summary.portfolioValue | number : '1.2-2' }},
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
+    <div class="ticker-track">
+      <ng-container *ngTemplateOutlet="items; context: { $implicit: state }"></ng-container>
+      <ng-container *ngTemplateOutlet="items; context: { $implicit: state }"></ng-container>
     </div>
-
-    <div *ngIf="state.summary.dailyReturn as return" class="scroll-text small">
-      <div>1d:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div *ngIf="state.summary.weeklyReturn as return" class="scroll-text small">
-      <div>1w:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div
-      *ngIf="state.summary.monthlyReturn as return"
-      class="scroll-text small"
-    >
-      <div>1m:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <!-- Duplicate items below -->
-
-    <div *ngIf="state.summary.totalReturn as return" class="scroll-text">
-      <div>Portfolio value:</div>
-      <div class="bold">
-        {{ state.summary.portfolioValue | number : '1.2-2' }},
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div *ngIf="state.summary.dailyReturn as return" class="scroll-text small">
-      <div>1d:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div *ngIf="state.summary.weeklyReturn as return" class="scroll-text small">
-      <div>1w:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div
-      *ngIf="state.summary.monthlyReturn as return"
-      class="scroll-text small"
-    >
-      <div>1m:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div *ngIf="state.summary.totalReturn as return" class="scroll-text">
-      <div>Portfolio value:</div>
-      <div class="bold">
-        {{ state.summary.portfolioValue | number : '1.2-2' }},
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div *ngIf="state.summary.dailyReturn as return" class="scroll-text small">
-      <div>1d:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div *ngIf="state.summary.weeklyReturn as return" class="scroll-text small">
-      <div>1w:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <div
-      *ngIf="state.summary.monthlyReturn as return"
-      class="scroll-text small"
-    >
-      <div>1m:</div>
-      <div
-        class="bold"
-        [ngClass]="{ negative: return.absolute < 0 }"
-        class="number-text"
-      >
-        {{ return.absolute | number : '1.2-2' }}
-      </div>
-      <div [ngClass]="{ negative: return.absolute < 0 }" class="number-text">
-        ({{ return.percentage | number : '1.2-2' }}%)
-      </div>
-    </div>
-
-    <!-- Duplicate above -->
   </ng-container>
 </div>
+
+<ng-template #items let-state>
+
+  <span class="ticker-item">
+    <span class="ticker-label">TOTAL</span>
+    <span class="ticker-value">€{{ state.summary.portfolioValue | number:'1.0-0' }}</span>
+    <span class="ticker-change"
+      [ngClass]="state.summary.totalReturn.absolute >= 0 ? 'ticker-pos' : 'ticker-neg'">
+      {{ state.summary.totalReturn.absolute >= 0 ? '▲' : '▼' }}
+      {{ state.summary.totalReturn.absolute | number:'1.2-2' }}
+      ({{ state.summary.totalReturn.percentage | number:'1.2-2' }}%)
+    </span>
+  </span>
+  <span class="ticker-sep">◆</span>
+
+  <ng-container *ngIf="state.summary.dailyReturn as r">
+    <span class="ticker-item">
+      <span class="ticker-label">1D</span>
+      <span class="ticker-change" [ngClass]="r.absolute >= 0 ? 'ticker-pos' : 'ticker-neg'">
+        {{ r.absolute >= 0 ? '▲' : '▼' }}
+        {{ r.absolute | number:'1.2-2' }}
+        ({{ r.percentage | number:'1.2-2' }}%)
+      </span>
+    </span>
+    <span class="ticker-sep">◆</span>
+  </ng-container>
+
+  <ng-container *ngIf="state.summary.weeklyReturn as r">
+    <span class="ticker-item">
+      <span class="ticker-label">1W</span>
+      <span class="ticker-change" [ngClass]="r.absolute >= 0 ? 'ticker-pos' : 'ticker-neg'">
+        {{ r.absolute >= 0 ? '▲' : '▼' }}
+        {{ r.absolute | number:'1.2-2' }}
+        ({{ r.percentage | number:'1.2-2' }}%)
+      </span>
+    </span>
+    <span class="ticker-sep">◆</span>
+  </ng-container>
+
+  <ng-container *ngIf="state.summary.monthlyReturn as r">
+    <span class="ticker-item">
+      <span class="ticker-label">1M</span>
+      <span class="ticker-change" [ngClass]="r.absolute >= 0 ? 'ticker-pos' : 'ticker-neg'">
+        {{ r.absolute >= 0 ? '▲' : '▼' }}
+        {{ r.absolute | number:'1.2-2' }}
+        ({{ r.percentage | number:'1.2-2' }}%)
+      </span>
+    </span>
+    <span class="ticker-sep">◆</span>
+  </ng-container>
+
+</ng-template>

@@ -1,16 +1,9 @@
 <div class="app-shell" [class.is-mobile]="mobileQuery.matches">
 
   <mat-toolbar class="app-toolbar">
-    <button mat-icon-button (click)="snav.toggle()" aria-label="Toggle navigation">
+    <button mat-icon-button class="menu-btn" (click)="snav.toggle()" aria-label="Toggle navigation">
       <mat-icon>menu</mat-icon>
     </button>
-
-    <a class="nav-brand" [routerLink]="['dashboard']">
-      <img src="assets/logo.png" alt="sailor" class="nav-logo" />
-      <span class="wordmark">s<span class="ai">ai</span>lor</span>
-    </a>
-
-    <span class="nav-spacer"></span>
     <aws-scrolling-text></aws-scrolling-text>
   </mat-toolbar>
 
@@ -33,6 +26,12 @@
       fixedTopGap="56"
     >
       <div class="sidenav-inner">
+
+        <div class="sidenav-header">
+          <img src="assets/logo.png" alt="sailor" class="sidenav-logo" />
+          <span class="wordmark">s<span class="ai">ai</span>lor</span>
+        </div>
+
         <mat-nav-list>
           <a
             mat-list-item
@@ -51,6 +50,7 @@
             Log out
           </button>
         </div>
+
       </div>
     </mat-sidenav>
 

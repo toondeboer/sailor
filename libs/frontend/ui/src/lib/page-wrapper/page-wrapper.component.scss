@@ -11,9 +11,10 @@
 // ─── Toolbar ─────────────────────────────────────────────────────────────────
 .app-toolbar {
   border-bottom: 1px solid $color-border;
-  gap: 8px;
+  gap: 0;
   position: relative;
   z-index: 10;
+  padding: 0 !important;  // override Material default padding so ticker truly fills edge-to-edge
 }
 
 .is-mobile .app-toolbar {
@@ -21,31 +22,14 @@
   z-index: 100;
 }
 
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  margin-left: 4px;
-
-  &:hover .wordmark {
-    color: $color-sand;
-  }
-}
-
-.nav-logo {
-  height: 32px;
-  width: auto;
-  object-fit: contain;
-}
-
-.nav-spacer {
-  flex: 1;
+.menu-btn {
+  flex-shrink: 0;
+  margin: 0 4px;
 }
 
 aws-scrolling-text {
-  max-width: 400px;
-  overflow: hidden;
+  flex: 1;
+  min-width: 0;   // required for overflow to work inside a flex child
 }
 
 // ─── Loading bar ─────────────────────────────────────────────────────────────
@@ -77,8 +61,23 @@ aws-scrolling-text {
 
   mat-nav-list {
     flex: 1;
-    padding-top: 16px;
+    padding-top: 8px;
   }
+}
+
+// ─── Sidenav header (logo + wordmark) ────────────────────────────────────────
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid $color-border;
+}
+
+.sidenav-logo {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
 }
 
 // ─── Nav items ───────────────────────────────────────────────────────────────
