@@ -3,8 +3,8 @@
   <header [class.scrolled]="isScrolled">
     <nav class="container">
       <a href="#" class="logo">
-        <div class="logo-icon">📈</div>
-        Investments Tracker
+        <img src="assets/logo.png" alt="sailor logo" class="logo-img" />
+        <span class="wordmark">s<span class="ai">ai</span>lor</span>
       </a>
       <ul class="nav-links">
         <li><a href="#features" (click)="scrollTo('features', $event)">Features</a></li>
@@ -35,19 +35,20 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <h1 class="hero-title">Track Your Investments Like a Pro</h1>
+      <h1 class="hero-title">Navigate Your Investments<br>with <em>AI</em>-Powered Precision</h1>
       <p class="hero-subtitle">
-        Powerful analytics, seamless DeGiro integration, and real-time data to help you make smarter investment decisions.
+        Charting your course to financial clarity — real-time analytics, seamless DeGiro integration,
+        and intelligent insights to help you sail toward your goals.
       </p>
       <div class="hero-cta">
-        <button class="btn btn-primary btn-large" (click)="onClick()">Start Tracking for Free</button>
+        <button class="btn btn-primary btn-large" (click)="onClick()">Start Navigating for Free</button>
       </div>
 
       <div class="dashboard-preview">
         <div class="chart-container">
           <div class="chart-placeholder" [class.loaded]="chartLoaded">
-            <span *ngIf="!chartLoaded">📊 Loading Analytics...</span>
-            <span *ngIf="chartLoaded">📈 Live Portfolio Performance</span>
+            <span *ngIf="!chartLoaded">⚓ Charting Portfolio...</span>
+            <span *ngIf="chartLoaded">🧭 Live Portfolio Performance</span>
           </div>
         </div>
         <div class="stats-grid">
@@ -67,7 +68,7 @@
   <!-- Features Section -->
   <section id="features" class="features">
     <div class="container">
-      <h2 class="section-title">Everything You Need to Track Your Investments</h2>
+      <h2 class="section-title">Everything You Need to Chart Your Course</h2>
       <div class="features-grid">
         <div
           class="feature-card"
@@ -84,7 +85,7 @@
   <!-- How It Works Section -->
   <section id="how-it-works" class="how-it-works">
     <div class="container">
-      <h2 class="section-title">Get Started in Minutes</h2>
+      <h2 class="section-title">Set Sail in Minutes</h2>
       <div class="steps">
         <div
           class="step"
@@ -102,16 +103,19 @@
   <!-- CTA Section -->
   <section class="cta-section">
     <div class="container">
-      <h2>Ready to Take Control of Your Investments?</h2>
-      <p>Join thousands of investors who trust Investments Tracker for their investment analytics.</p>
-      <button class="btn btn-primary btn-large" (click)="onClick()">Start Tracking</button>
+      <h2>Ready to Navigate Smarter?</h2>
+      <p>Join investors who trust sailor to chart their financial journey with AI-powered clarity.</p>
+      <button class="btn btn-primary btn-large" (click)="onClick()">Start Navigating</button>
     </div>
   </section>
 
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>&copy; {{ currentYear }} Investments Tracker. All rights reserved. | Privacy Policy | Terms of Service</p>
+      <div class="footer-brand">
+        <span class="wordmark">s<span class="ai">ai</span>lor</span>
+      </div>
+      <p>&copy; {{ currentYear }} sailor. All rights reserved. | Privacy Policy | Terms of Service</p>
     </div>
   </footer>
 </div>

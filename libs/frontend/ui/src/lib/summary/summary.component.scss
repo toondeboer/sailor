@@ -1,24 +1,48 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
 .grid {
-  margin-top: 10px;
+  margin-top: 16px;
+  gap: 12px;
+  justify-content: flex-start;
+
+  @include respond-to($bp-md) {
+    justify-content: center;
+  }
 }
 
 .box {
+  @include nautical-card;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
-  margin: 5px;
-  border: solid 1px black;
-  border-radius: 5px;
+  padding: 16px 24px;
+  min-width: 160px;
   text-align: center;
-  background-color: white;
-  box-shadow: 5px 10px 18px #888888;
-}
 
-.number-text {
-  color: green;
-}
-.negative {
-  color: red;
+  // Label row
+  > div:first-child {
+    color: $color-muted;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    white-space: nowrap;
+  }
+
+  // Metric value
+  .bold {
+    font-family: $font-serif;
+    font-size: 1.5rem;
+    color: $color-cream;
+  }
+
+  .number-text.bold {
+    color: $color-gold;
+  }
+
+  .negative.bold {
+    color: $color-error;
+  }
 }

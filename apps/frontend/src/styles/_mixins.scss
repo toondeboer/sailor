@@ -30,3 +30,30 @@
   align-items: center;
   justify-content: center;
 }
+
+// Dark nautical card surface with a subtle gold border and elevation shadow.
+@mixin nautical-card {
+  background-color: $color-bg-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  transition: $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-card-hover;
+    border-color: $color-border-strong;
+  }
+}
+
+// Apply antique gold colour to text — typically for key metric values.
+@mixin gold-text {
+  color: $color-gold;
+  font-weight: 600;
+}
+
+// Serif display heading — Playfair Display, cream, slight tracking.
+@mixin serif-heading {
+  font-family: $font-serif;
+  color: $color-cream;
+  letter-spacing: 0.02em;
+}

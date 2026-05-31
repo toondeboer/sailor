@@ -40,49 +40,49 @@ export class LandingPageComponent implements OnInit, OnDestroy {
 
   features: Feature[] = [
     {
-      icon: '👤',
-      title: 'Secure Account Management',
+      icon: '⚓',
+      title: 'Secure Harbour',
       description:
-        'Create your personal account with enterprise-grade security. Your data is encrypted and protected at all times.',
+        'Enterprise-grade security keeps your portfolio data encrypted and protected at all times — a safe harbour for your investments.',
     },
     {
-      icon: '📊',
-      title: 'Advanced Analytics',
+      icon: '🧭',
+      title: 'AI-Powered Insights',
       description:
-        'Beautiful line and bar charts that visualize your portfolio performance over time with detailed insights and trends.',
+        'Intelligent analytics chart your course. Beautiful visualisations and trend detection help you navigate markets with confidence.',
     },
     {
-      icon: '🔗',
+      icon: '🌊',
       title: 'DeGiro Integration',
       description:
-        'Seamlessly upload CSV files from DeGiro. Our smart parser automatically imports and organizes your trading data.',
+        'Seamlessly import CSV exports from DeGiro. Our smart parser automatically organises your trading history — no manual entry.',
     },
     {
       icon: '⚡',
       title: 'Real-Time Data',
       description:
-        'Live market data powered by Yahoo Finance API. Stay updated with real-time prices and market movements.',
+        'Live market data powered by Yahoo Finance. Stay current with real-time prices and portfolio valuation as markets move.',
     },
   ];
 
   steps: Step[] = [
     {
       number: 1,
-      title: 'Create Account',
+      title: 'Set Sail',
       description:
-        'Sign up with your email and create a secure password. It takes less than 30 seconds.',
+        'Create your account in under 30 seconds. sailor handles the authentication so you can focus on your investments.',
     },
     {
       number: 2,
-      title: 'Upload Data',
+      title: 'Chart Your Course',
       description:
-        "Download your CSV from DeGiro and upload it to our platform. We'll handle the rest automatically.",
+        "Export your CSV from DeGiro and upload it. Our AI engine automatically charts your complete trading history.",
     },
     {
       number: 3,
-      title: 'Track Performance',
+      title: 'Navigate to Growth',
       description:
-        'Watch your portfolio come to life with real-time analytics and beautiful visualizations.',
+        'Watch your portfolio come alive with real-time analytics, performance charts, and intelligent insights.',
     },
   ];
 

@@ -1,28 +1,94 @@
-.scroll-container {
+@use 'tokens' as *;
+
+:host {
   display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+// ─── Viewport — clips overflow, applies left-edge fade ───────────────────────
+.ticker-viewport {
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  white-space: nowrap;
-  width: 3150px; // 3 * (width .scroll-text + 3 * width .small)
-}
-
-.scroll-text {
-  animation: scrollText 10s linear infinite;
-  width: 450px;
   display: flex;
-  gap: 5px;
+  align-items: center;
+
+  // Fade from transparent (left, behind menu button) to opaque
+  mask-image: linear-gradient(
+    to right,
+    transparent 0px,
+    rgba(0, 0, 0, 0.4) 16px,
+    black 56px
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0px,
+    rgba(0, 0, 0, 0.4) 16px,
+    black 56px
+  );
 }
 
-.small {
-  width: 200px;
+// ─── Track — the single element that scrolls ─────────────────────────────────
+// Content is duplicated once (2×), so translateX(-50%) = exactly one full loop.
+.ticker-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  white-space: nowrap;
+  animation: ticker-scroll 28s linear infinite;
+
+  &:hover {
+    animation-play-state: paused;
+  }
 }
 
-@keyframes scrollText {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(
-      -1050px
-    ); // Equals the size of the child components (Excluding the duplicates at the end)
-  }
+// 4 copies → -25% = exactly one copy width. Needs each copy > viewport/3 to fill.
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-25%); }
+}
+
+// ─── Items ────────────────────────────────────────────────────────────────────
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+}
+
+.ticker-label {
+  color: $color-gold;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.85;
+}
+
+.ticker-value {
+  color: $color-cream;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.ticker-change {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.ticker-pos { color: $color-success; }
+.ticker-neg { color: $color-error; }
+
+// ─── Separator ────────────────────────────────────────────────────────────────
+.ticker-sep {
+  color: $color-border-strong;
+  font-size: 0.45rem;
+  flex-shrink: 0;
+  // vertical centering of the small diamond
+  line-height: 1;
+  position: relative;
+  top: 1px;
 }
