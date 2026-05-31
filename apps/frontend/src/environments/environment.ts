@@ -3,4 +3,8 @@ export const environment = {
   baseUrl: 'http://localhost:4200',
   yahooLambdaUrl: 'http://localhost:4200/yahoo_finance',
   dynamoDBLambdaUrl: 'http://localhost:4200/microservice',
+  cognito: {
+    userPoolId: 'us-east-1_liCB4LgDE',
+    clientId: '3o34bbl92faeo9ljo11eebtim2',
+  },
 };

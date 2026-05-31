@@ -60,8 +60,8 @@ def handler(event, context):
             resp = table.query(KeyConditionExpression=Key('userId').eq(user_id))
             items = resp.get('Items', [])
             if not items:
-                # New users have no row yet — return an empty transactions object.
-                body = '{}'
+                # New users have no row yet — return a valid empty DatabaseDto.
+                body = '{"transactions":{"stock":[],"dividend":[],"commission":[]}}'
             else:
                 item = items[0]
                 # schemaVersion is absent on pre-migration items (treat as v0).

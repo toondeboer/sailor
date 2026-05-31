@@ -13,7 +13,6 @@ import { UiModule } from '@aws/ui';
 import { YahooModule } from '@aws/yahoo';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
-import { AuthModule } from 'angular-auth-oidc-client';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from '../auth/jwtInterceptor/JwtInterceptor';
 
@@ -31,22 +30,7 @@ import { JwtInterceptor } from '../auth/jwtInterceptor/JwtInterceptor';
     StoreDevtoolsModule.instrument(),
     UiModule,
     NgxEchartsModule.forRoot({
-      /**
-       * This will import all modules from echarts.
-       * If you only need custom modules,
-       * please refer to [Custom Build] section.
-       */
-      echarts: () => import('echarts'), // or import('./path-to-my-custom-echarts')
-    }),
-    AuthModule.forRoot({
-      config: {
-        authority:
-          'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_liCB4LgDE',
-        redirectUrl: `${environment.baseUrl}/callback`,
-        clientId: '3o34bbl92faeo9ljo11eebtim2',
-        scope: 'email openid profile',
-        responseType: 'code',
-      },
+      echarts: () => import('echarts'),
     }),
   ],
   providers: [
@@ -54,6 +38,5 @@ import { JwtInterceptor } from '../auth/jwtInterceptor/JwtInterceptor';
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],
-  exports: [AuthModule],
 })
 export class AppModule {}

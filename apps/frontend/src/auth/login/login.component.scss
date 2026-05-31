@@ -1,0 +1,177 @@
+@use 'tokens' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg-base;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(30, 96, 145, 0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(201, 168, 76, 0.08) 0%, transparent 60%);
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: $color-bg-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card, $shadow-gold;
+  padding: 48px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: fadeInUp 0.4s ease both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.wordmark {
+  font-family: $font-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: $color-cream;
+  letter-spacing: 0.04em;
+  text-align: center;
+  margin-bottom: 28px;
+
+  .ai {
+    color: $color-gold;
+  }
+}
+
+.heading {
+  font-family: $font-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $color-cream;
+  text-align: center;
+  margin: 0 0 6px;
+}
+
+.subheading {
+  font-family: $font-sans;
+  font-size: 0.875rem;
+  color: $color-muted;
+  text-align: center;
+  margin: 0 0 28px;
+}
+
+.error-banner {
+  background: rgba(231, 76, 60, 0.12);
+  border: 1px solid rgba(231, 76, 60, 0.4);
+  border-radius: $radius-sm;
+  color: #ff6b6b;
+  font-family: $font-sans;
+  font-size: 0.8125rem;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+
+  label {
+    font-family: $font-sans;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $color-muted;
+    letter-spacing: 0.02em;
+  }
+
+  input {
+    background: $color-bg-elevated;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    color: $color-cream;
+    font-family: $font-sans;
+    font-size: 0.9375rem;
+    padding: 11px 14px;
+    outline: none;
+    transition: $transition-base;
+
+    &::placeholder {
+      color: rgba(143, 168, 192, 0.5);
+    }
+
+    &:focus {
+      border-color: $color-gold;
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 13px;
+  margin-top: 8px;
+  background: $accent-gradient;
+  border: none;
+  border-radius: $radius-sm;
+  color: $color-bg-base;
+  font-family: $font-sans;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: $transition-base;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+    box-shadow: $shadow-gold;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(10, 22, 40, 0.3);
+  border-top-color: $color-bg-base;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.footer-link {
+  font-family: $font-sans;
+  font-size: 0.8125rem;
+  color: $color-muted;
+  text-align: center;
+  margin: 20px 0 0;
+
+  a {
+    color: $color-gold;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      color: $color-gold-light;
+      text-decoration: underline;
+    }
+  }
+}

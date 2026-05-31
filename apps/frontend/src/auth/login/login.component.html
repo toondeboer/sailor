@@ -1,0 +1,42 @@
+<div class="page">
+  <div class="card" (keydown.enter)="submit()">
+    <div class="wordmark">s<span class="ai">AI</span>lor</div>
+    <h1 class="heading">Welcome back</h1>
+    <p class="subheading">Sign in to your portfolio</p>
+
+    <div class="error-banner" *ngIf="error" role="alert">{{ error }}</div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        placeholder="you@example.com"
+        [(ngModel)]="email"
+        [disabled]="loading"
+      />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+        [(ngModel)]="password"
+        [disabled]="loading"
+      />
+    </div>
+
+    <button class="btn-primary" (click)="submit()" [disabled]="loading || !email || !password">
+      <span *ngIf="!loading">Sign in</span>
+      <span *ngIf="loading" class="spinner"></span>
+    </button>
+
+    <p class="footer-link">
+      Don't have an account? <a routerLink="/signup">Sign up</a>
+    </p>
+  </div>
+</div>

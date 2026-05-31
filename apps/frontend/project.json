@@ -13,14 +13,20 @@
         "outputPath": "dist/apps/frontend",
         "index": "apps/frontend/src/index.html",
         "main": "apps/frontend/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": ["apps/frontend/src/polyfills-global.ts", "zone.js"],
         "tsConfig": "apps/frontend/tsconfig.app.json",
         "assets": ["apps/frontend/src/favicon.ico", "apps/frontend/src/assets"],
         "styles": ["apps/frontend/src/styles.scss"],
         "stylePreprocessorOptions": {
           "includePaths": ["apps/frontend/src/styles"]
         },
-        "scripts": []
+        "scripts": [],
+        "allowedCommonJsDependencies": [
+          "isomorphic-unfetch",
+          "@aws-crypto/sha256-js",
+          "buffer",
+          "js-cookie"
+        ]
       },
       "configurations": {
         "production": {
