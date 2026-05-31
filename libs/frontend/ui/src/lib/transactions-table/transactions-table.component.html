@@ -1,20 +1,5 @@
 <div class="transactions-page">
 
-  <!-- Page header -->
-  <div class="page-header">
-    <h1 class="page-title">Transactions</h1>
-  </div>
-
-  <!-- CSV upload card -->
-  <div class="upload-card">
-    <div class="upload-label">Import from DeGiro CSV</div>
-    <label class="file-upload-area">
-      <span class="upload-icon">🌊</span>
-      <span class="upload-text">Drop your DeGiro CSV here, or <span class="upload-link">browse</span></span>
-      <input type="file" (change)="handleFileInput($event)" accept=".csv" class="file-input" />
-    </label>
-  </div>
-
   <!-- Transaction list per ticker -->
   <div class="ticker-section" *ngFor="let key of Object.keys(stocks)">
     <details class="ticker-panel">

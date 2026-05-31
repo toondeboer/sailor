@@ -2,6 +2,8 @@ import { Route } from '@angular/router';
 import {
   DashboardComponent,
   PageWrapperComponent,
+  PortfoliosComponent,
+  SettingsComponent,
   TransactionsComponent,
 } from '@aws/ui';
 import { LandingWrapperComponent } from '../auth/landing-wrapper/landing-wrapper.component';
@@ -20,7 +22,9 @@ export const appRoutes: Route[] = [
     canActivate: [AuthGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'transactions', component: TransactionsComponent },
+      { path: 'portfolios', component: PortfoliosComponent },
+      { path: 'settings', component: SettingsComponent },
+      { path: 'transactions', redirectTo: 'portfolios' },
       { path: '**', redirectTo: 'dashboard' },
     ],
   },

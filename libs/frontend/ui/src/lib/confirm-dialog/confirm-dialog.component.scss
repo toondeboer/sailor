@@ -1,0 +1,48 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+.dialog-title {
+  @include serif-heading;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 24px 24px 0;
+  margin: 0;
+}
+
+.dialog-content {
+  padding: 16px 24px 4px !important;
+  min-width: 320px;
+}
+
+.dialog-message {
+  color: $color-muted;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 20px;
+}
+
+.btn-danger {
+  padding: 0.75rem 1.5rem;
+  border-radius: $radius-sm;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: $font-sans;
+  border: none;
+  cursor: pointer;
+  background: rgba($color-error, 0.15);
+  color: $color-error;
+  border: 1px solid rgba($color-error, 0.3);
+  transition: $transition-base;
+
+  &:hover {
+    background: rgba($color-error, 0.25);
+    border-color: $color-error;
+  }
+}

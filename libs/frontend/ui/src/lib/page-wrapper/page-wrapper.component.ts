@@ -45,8 +45,9 @@ export class PageWrapperComponent implements OnInit, OnDestroy {
   loading$ = this.store.select(selectLoading);
   mobileQuery: MediaQueryList;
   navigationOptions = [
-    { path: 'dashboard',     text: 'Dashboard',     icon: 'dashboard' },
-    { path: 'transactions',  text: 'Transactions',  icon: 'tune' },
+    { path: 'dashboard',  text: 'Dashboard',  icon: 'dashboard' },
+    { path: 'portfolios', text: 'Portfolios', icon: 'folder' },
+    { path: 'settings',   text: 'Settings',   icon: 'settings' },
   ];
 
   private _mobileQueryListener: () => void;

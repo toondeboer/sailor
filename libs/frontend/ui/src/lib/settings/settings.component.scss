@@ -1,0 +1,81 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+:host {
+  display: block;
+  padding: 32px 24px;
+}
+
+.settings-page {
+  max-width: 600px;
+}
+
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $color-border;
+}
+
+.page-title {
+  @include serif-heading;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.settings-card {
+  @include nautical-card;
+  padding: 24px;
+}
+
+.card-title {
+  @include serif-heading;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.card-description {
+  font-size: 0.85rem;
+  color: $color-muted;
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $color-muted;
+}
+
+.field-select {
+  background: $color-bg-base;
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-sm;
+  padding: 10px 14px;
+  color: $color-cream;
+  font-family: $font-sans;
+  font-size: 0.9rem;
+  width: 200px;
+  outline: none;
+  transition: $transition-base;
+  cursor: pointer;
+  appearance: auto;
+
+  option {
+    background: $color-bg-base;
+    color: $color-cream;
+  }
+
+  &:focus {
+    border-color: $color-gold;
+    box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.15);
+  }
+}

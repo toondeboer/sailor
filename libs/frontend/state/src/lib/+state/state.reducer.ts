@@ -1,8 +1,14 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import {
+  createPortfolio,
+  createPortfolioFailure,
+  createPortfolioSuccess,
   deleteAllTransactions,
   deleteAllTransactionsFailure,
   deleteAllTransactionsSuccess,
+  deletePortfolio,
+  deletePortfolioFailure,
+  deletePortfolioSuccess,
   deleteTransaction,
   deleteTransactionFailure,
   deleteTransactionSuccess,
@@ -13,77 +19,123 @@ import {
   handleFileInput,
   handleFileInputFailure,
   handleFileInputSuccess,
+  importDeGiroCsv,
+  importDeGiroCsvFailure,
+  importDeGiroCsvSuccess,
+  importYahooCsv,
+  importYahooCsvFailure,
+  importYahooCsvSuccess,
+  renamePortfolio,
+  renamePortfolioFailure,
+  renamePortfolioSuccess,
   saveTransaction,
   saveTransactionFailure,
   saveTransactionSuccess,
   setChartData,
+  setSelectedPortfolios,
+  updateSettings,
+  updateSettingsFailure,
+  updateSettingsSuccess,
 } from './state.actions';
-import { Ticker, TransactionsDbo } from '@aws/util';
+import { PortfolioDbo, Ticker, UserSettingsDbo } from '@aws/util';
 
 export const featureKey = 'state';
 
-// The reducer stores only RAW inputs: the transactions loaded from the backend
-// and the Yahoo price tickers. Every derived value (stocks, dates, summary,
-// chart data) is computed on demand in memoized selectors — see
-// state.selectors.ts. This keeps the reducer pure and cheap, and means the
-// expensive portfolio math runs only when its inputs actually change.
+// The reducer stores only RAW inputs: the portfolios loaded from the backend,
+// user settings, and the Yahoo price tickers. All derived values (stocks, dates,
+// summary, chart data) are computed on demand in memoized selectors.
 export interface FeatureState {
-  transactionsDbo: TransactionsDbo;
+  portfoliosDbo: PortfolioDbo[];
+  settings: UserSettingsDbo;
   tickers: { [ticker: string]: Ticker };
   loading: boolean;
   error: string | null;
-  // Epoch ms of the last successful transactions fetch; drives the getData cache.
   lastFetched: number | null;
+  // UI-only filter: which portfolios are shown on dashboard (not persisted).
+  selectedPortfolioIds: string[] | 'all';
 }
 
 export const initialState: FeatureState = {
-  transactionsDbo: { stock: [], dividend: [], commission: [] },
+  portfoliosDbo: [],
+  settings: { baseCurrency: 'EUR' },
   tickers: {},
   loading: false,
   error: null,
   lastFetched: null,
+  selectedPortfolioIds: 'all',
 };
 
 export const reducer = createReducer(
   initialState,
   on(getDataSuccess, (state, { data }) => ({
     ...state,
-    transactionsDbo: data,
+    portfoliosDbo: data.portfolios,
+    settings: data.settings,
   })),
   on(
+    createPortfolioSuccess,
+    renamePortfolioSuccess,
+    deletePortfolioSuccess,
     saveTransactionSuccess,
     deleteTransactionSuccess,
     deleteAllTransactionsSuccess,
+    importDeGiroCsvSuccess,
+    importYahooCsvSuccess,
     handleFileInputSuccess,
-    (state, { transactions }) => ({ ...state, transactionsDbo: transactions })
+    updateSettingsSuccess,
+    (state, { data }) => ({
+      ...state,
+      portfoliosDbo: data.portfolios,
+      settings: data.settings,
+    })
   ),
   on(setChartData, (state, { tickers }) => ({ ...state, tickers })),
-  // --- request / success / failure status tracking ---
+  on(setSelectedPortfolios, (state, { ids }) => ({
+    ...state,
+    selectedPortfolioIds: ids,
+  })),
+  // --- loading / error tracking ---
   on(
     getData,
+    createPortfolio,
+    renamePortfolio,
+    deletePortfolio,
     saveTransaction,
     deleteTransaction,
     deleteAllTransactions,
+    importDeGiroCsv,
+    importYahooCsv,
     handleFileInput,
+    updateSettings,
     (state) => ({ ...state, loading: true, error: null })
   ),
   on(
     getDataSuccess,
+    createPortfolioSuccess,
+    renamePortfolioSuccess,
+    deletePortfolioSuccess,
     saveTransactionSuccess,
     deleteTransactionSuccess,
     deleteAllTransactionsSuccess,
+    importDeGiroCsvSuccess,
+    importYahooCsvSuccess,
     handleFileInputSuccess,
+    updateSettingsSuccess,
     (state) => ({ ...state, loading: false, lastFetched: Date.now() })
   ),
-  // Cache hit: clear loading without touching data (and without re-triggering
-  // the Yahoo fetch, which keys off getDataSuccess).
   on(getDataCached, (state) => ({ ...state, loading: false })),
   on(
     getDataFailure,
+    createPortfolioFailure,
+    renamePortfolioFailure,
+    deletePortfolioFailure,
     saveTransactionFailure,
     deleteTransactionFailure,
     deleteAllTransactionsFailure,
+    importDeGiroCsvFailure,
+    importYahooCsvFailure,
     handleFileInputFailure,
+    updateSettingsFailure,
     (state, { error }) => ({ ...state, loading: false, error })
   )
 );

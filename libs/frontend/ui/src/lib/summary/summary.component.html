@@ -1,67 +1,44 @@
 <div class="grid">
   <div class="box">
-    <div>Portfolio value</div>
+    <div>Portfolio value <span class="currency-badge">{{ currency }}</span></div>
     <div class="number-text bold">
-      {{ summary.portfolioValue | number : '1.2-2' }}
+      {{ safeSummary.portfolioValue | number : '1.2-2' }}
     </div>
   </div>
   <div class="box">
-    <div>Total Invested</div>
-    <div class="bold">{{ summary.totalInvested | number : '1.2-2' }}</div>
+    <div>Total Invested <span class="currency-badge">{{ currency }}</span></div>
+    <div class="bold">{{ safeSummary.totalInvested | number : '1.2-2' }}</div>
   </div>
   <div class="box">
-    <div>Profit (excl. commission)</div>
+    <div>Profit (excl. commission) <span class="currency-badge">{{ currency }}</span></div>
     <div
       [ngClass]="{
-        negative: summary.portfolioValue - summary.totalInvested < 0
+        negative: safeSummary.portfolioValue - safeSummary.totalInvested < 0
       }"
       class="number-text bold"
     >
-      {{ summary.portfolioValue - summary.totalInvested | number : '1.2-2' }}
+      {{ safeSummary.portfolioValue - safeSummary.totalInvested | number : '1.2-2' }}
     </div>
   </div>
   <div class="box">
-    <div>Profit (incl. commission)</div>
+    <div>Profit (incl. commission) <span class="currency-badge">{{ currency }}</span></div>
     <div
-      [ngClass]="{ negative: summary.totalReturn.absolute < 0 }"
+      [ngClass]="{ negative: safeSummary.totalReturn.absolute < 0 }"
       class="number-text bold"
     >
-      {{ summary.totalReturn.absolute | number : '1.2-2' }}
+      {{ safeSummary.totalReturn.absolute | number : '1.2-2' }}
     </div>
   </div>
-<!--  <div class="box">-->
-<!--    <div>Shares</div>-->
-<!--    <div class="bold">-->
-<!--      {{ summary.amountOfShares }}-->
-<!--    </div>-->
-<!--  </div>-->
-<!--  <div class="box">-->
-<!--    <div>Avarage Price paid per share</div>-->
-<!--    <div-->
-<!--      [ngClass]="{-->
-<!--        negative: summary.averageSharePrice > summary.currentSharePrice-->
-<!--      }"-->
-<!--      class="number-text bold"-->
-<!--    >-->
-<!--      {{ summary.averageSharePrice | number : '1.2-2' }}-->
-<!--    </div>-->
-<!--  </div>-->
-<!--  <div class="box">-->
-<!--    <div>Current Share price</div>-->
-<!--    <div class="bold">-->
-<!--      {{ summary.currentSharePrice | number : '1.2-2' }}-->
-<!--    </div>-->
-<!--  </div>-->
   <div class="box">
-    <div>Total Dividend</div>
+    <div>Total Dividend <span class="currency-badge">{{ currency }}</span></div>
     <div class="number-text bold">
-      {{ summary.totalDividend | number : '1.2-2' }}
+      {{ safeSummary.totalDividend | number : '1.2-2' }}
     </div>
   </div>
   <div class="box">
-    <div>Total Commission</div>
+    <div>Total Commission <span class="currency-badge">{{ currency }}</span></div>
     <div class="negative bold">
-      {{ summary.totalCommission | number : '1.2-2' }}
+      {{ safeSummary.totalCommission | number : '1.2-2' }}
     </div>
   </div>
 </div>

@@ -1,0 +1,22 @@
+<h2 class="dialog-title">{{ data.title }}</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="field-group">
+    <label class="field-label">Name</label>
+    <input
+      class="field-input"
+      type="text"
+      [(ngModel)]="name"
+      (keyup.enter)="confirm()"
+      placeholder="e.g. DEGIRO, Long-term, ISA…"
+      autofocus
+    />
+  </div>
+</mat-dialog-content>
+
+<div class="dialog-actions">
+  <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+  <button class="btn btn-primary" (click)="confirm()" [disabled]="!name.trim()">
+    Confirm
+  </button>
+</div>

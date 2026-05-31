@@ -12,11 +12,11 @@ const transactionDboSchema = z
     ticker: z.string(),
     type: z.string(),
     date: z.string(),
+    time: z.string().optional(),
     amount: z.number(),
     value: z.number(),
     currency: z.string(),
   })
-  // Keep any extra columns the backend may add rather than stripping them.
   .passthrough();
 
 const transactionsDboSchema = z.object({
@@ -25,20 +25,60 @@ const transactionsDboSchema = z.object({
   commission: z.array(transactionDboSchema),
 });
 
-const databaseDtoSchema = z
+const userSettingsDboSchema = z.object({
+  baseCurrency: z.string().default('EUR'),
+});
+
+const portfolioDboSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  transactions: transactionsDboSchema,
+});
+
+const databaseDtoV2Schema = z.object({
+  portfolios: z.array(portfolioDboSchema),
+  settings: userSettingsDboSchema,
+  schemaVersion: z.literal(2),
+});
+
+// v1 shape — used only during migration.
+const databaseDtoV1Schema = z
   .object({
     startDate: z.string().optional().default(''),
     transactions: transactionsDboSchema,
   })
   .passthrough();
 
+const EMPTY_TRANSACTIONS = { stock: [], dividend: [], commission: [] };
+const EMPTY_V2: DatabaseDto = {
+  portfolios: [{ id: 'default', name: 'Default', transactions: EMPTY_TRANSACTIONS }],
+  settings: { baseCurrency: 'EUR' },
+  schemaVersion: 2,
+};
+
 /**
- * Validate the DynamoDB response before it enters the store. Throws a ZodError
- * on a malformed shape, which the effect maps to a *Failure action (and a user
- * facing error toast) instead of silently feeding bad data into the reducer.
+ * Validate the DynamoDB response before it enters the store. Migrates v1
+ * payloads (flat transactions) into the v2 multi-portfolio shape transparently.
+ * Throws a ZodError on a malformed shape.
  */
 export function parseDatabaseDto(raw: unknown): DatabaseDto {
-  return databaseDtoSchema.parse(raw) as DatabaseDto;
+  if (raw === null || raw === undefined || (typeof raw === 'object' && Object.keys(raw as object).length === 0)) {
+    return EMPTY_V2;
+  }
+
+  const obj = raw as Record<string, unknown>;
+
+  if (obj['schemaVersion'] === 2) {
+    return databaseDtoV2Schema.parse(raw) as DatabaseDto;
+  }
+
+  // Migrate v1: wrap existing transactions in a "Default" portfolio.
+  const v1 = databaseDtoV1Schema.parse(raw);
+  return {
+    portfolios: [{ id: 'default', name: 'Default', transactions: v1.transactions }],
+    settings: { baseCurrency: 'EUR' },
+    schemaVersion: 2,
+  };
 }
 
 // --- Yahoo Finance (external) ---------------------------------------------
