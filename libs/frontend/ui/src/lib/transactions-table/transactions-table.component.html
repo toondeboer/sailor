@@ -1,95 +1,125 @@
-<h1>Transactions</h1>
+<div class="transactions-page">
 
-<div>
-  Upload from file:
-  <input type="file" (change)="handleFileInput($event)" accept=".csv" />
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">Transactions</h1>
+  </div>
+
+  <!-- CSV upload card -->
+  <div class="upload-card">
+    <div class="upload-label">Import from DeGiro CSV</div>
+    <label class="file-upload-area">
+      <span class="upload-icon">🌊</span>
+      <span class="upload-text">Drop your DeGiro CSV here, or <span class="upload-link">browse</span></span>
+      <input type="file" (change)="handleFileInput($event)" accept=".csv" class="file-input" />
+    </label>
+  </div>
+
+  <!-- Transaction list per ticker -->
+  <div class="ticker-section" *ngFor="let key of Object.keys(stocks)">
+    <details class="ticker-panel">
+      <summary class="ticker-header">
+        <span class="ticker-name">{{ stocks[key].ticker }}</span>
+        <span class="ticker-arrow">›</span>
+      </summary>
+
+      <div class="ticker-body">
+
+        <ng-container *ngIf="stocks[key].transactions">
+
+          <!-- Stock transactions -->
+          <div class="transaction-group" *ngIf="stocks[key].transactions?.stock?.length">
+            <div class="group-label">Stocks</div>
+            <div class="transaction-table">
+              <div class="table-header">
+                <span>Date</span>
+                <span>Amount</span>
+                <span>Value</span>
+                <span>Price/Share</span>
+              </div>
+              <div class="transaction-row" *ngFor="let transaction of stocks[key].transactions?.stock">
+                <span>{{ transaction.date.getDate() }}/{{ transaction.date.getUTCMonth() + 1 }}/{{ transaction.date.getFullYear() }}</span>
+                <span>{{ transaction.amount }}</span>
+                <span>{{ transaction.value }}</span>
+                <span>{{ transaction.value / transaction.amount | number : '1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dividend transactions -->
+          <div class="transaction-group" *ngIf="stocks[key].transactions?.dividend?.length">
+            <div class="group-label">Dividends</div>
+            <div class="transaction-table">
+              <div class="table-header">
+                <span>Date</span>
+                <span>Value</span>
+              </div>
+              <div class="transaction-row" *ngFor="let transaction of stocks[key].transactions?.dividend">
+                <span>{{ transaction.date.getDate() }}/{{ transaction.date.getUTCMonth() + 1 }}/{{ transaction.date.getFullYear() }}</span>
+                <span class="number-text">{{ transaction.value }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Commission transactions -->
+          <div class="transaction-group" *ngIf="stocks[key].transactions?.commission?.length">
+            <div class="group-label">Commission</div>
+            <div class="transaction-table">
+              <div class="table-header">
+                <span>Date</span>
+                <span>Value</span>
+              </div>
+              <div class="transaction-row" *ngFor="let transaction of stocks[key].transactions?.commission">
+                <span>{{ transaction.date.getDate() }}/{{ transaction.date.getUTCMonth() + 1 }}/{{ transaction.date.getFullYear() }}</span>
+                <span class="negative">{{ transaction.value }}</span>
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+      </div>
+    </details>
+  </div>
+
+  <!-- Add transaction form -->
+  <div class="form-card">
+    <h2 class="form-title">Add Transaction</h2>
+    <div class="transaction-form">
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-control" [(ngModel)]="type">
+          <option value="stock">Stock</option>
+          <option value="dividend">Dividend</option>
+          <option value="commission">Commission</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ticker</label>
+        <input class="form-control" type="text" [(ngModel)]="ticker" placeholder="e.g. AAPL" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-control" type="date" [(ngModel)]="date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount</label>
+        <input class="form-control" type="number" [(ngModel)]="amount" placeholder="0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Value</label>
+        <input class="form-control" type="number" [(ngModel)]="value" placeholder="0.00" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Currency</label>
+        <select class="form-control" [(ngModel)]="currency">
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" (click)="saveTransaction()">Save Transaction</button>
+      </div>
+    </div>
+  </div>
+
 </div>
-
-<div *ngFor="let key of Object.keys(stocks)">
-  <div>
-    {{stocks[key].ticker}}
-  </div>
-
-<ng-container *ngIf="stocks[key].transactions">
-  <div>Stocks</div>
-  <div *ngFor="let transaction of stocks[key].transactions.stock" class="transaction-row">
-    <div>
-      date : {{ transaction.date.getDate() }}/{{
-        transaction.date.getUTCMonth() + 1
-      }}/{{ transaction.date.getFullYear() }},
-    </div>
-    <div>amount : {{ transaction.amount }},</div>
-    <div>value : {{ transaction.value }}</div>
-    <div>
-      pps : {{ transaction.value / transaction.amount | number : '1.2-2' }}
-    </div>
-    <button
-      (click)="deleteTransaction(stocks[key].transactions, transaction)"
-      [disabled]="true"
-    >
-      Delete
-    </button>
-  </div>
-
-  <div>Dividend</div>
-  <div
-    *ngFor="let transaction of stocks[key].transactions.dividend"
-    class="transaction-row"
-  >
-    <div>
-      date : {{ transaction.date.getDate() }}/{{
-        transaction.date.getUTCMonth() + 1
-      }}/{{ transaction.date.getFullYear() }},
-    </div>
-    <div>value : {{ transaction.value }}</div>
-    <button
-      (click)="deleteTransaction(stocks[key].transactions, transaction)"
-      [disabled]="true"
-    >
-      Delete
-    </button>
-  </div>
-
-  <div>Commission</div>
-  <div
-    *ngFor="let transaction of stocks[key].transactions.commission"
-    class="transaction-row"
-  >
-    <div>
-      date : {{ transaction.date.getDate() }}/{{
-        transaction.date.getUTCMonth() + 1
-      }}/{{ transaction.date.getFullYear() }},
-    </div>
-    <div>value : {{ transaction.value }}</div>
-    <button
-      (click)="deleteTransaction(stocks[key].transactions, transaction)"
-      [disabled]="true"
-    >
-      Delete
-    </button>
-  </div>
-
-</ng-container>
-</div>
-
-<div class="transaction-form">
-  <div>Add transaction:</div>
-  <select [(ngModel)]="type">
-    <option value="stock">Stock</option>
-    <option value="dividend">Dividend</option>
-    <option value="commission">Commission</option>
-  </select>
-  <input type="text" [(ngModel)]="ticker" placeholder="ticker" />
-  <input type="date" [(ngModel)]="date" />
-  <input type="number" [(ngModel)]="amount" placeholder="amount" />
-  <input type="number" [(ngModel)]="value" placeholder="value" />
-  <select [(ngModel)]="currency">
-    <option value="EUR">Euro</option>
-    <option value="USD">US Dollar</option>
-  </select>
-  <button (click)="saveTransaction()">
-    Save
-  </button>
-</div>
-
-<button (click)="deleteAll()" [disabled]="true">Delete All Transactions</button>

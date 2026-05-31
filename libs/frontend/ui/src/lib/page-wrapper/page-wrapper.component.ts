@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import {
   MatSidenav,
   MatSidenavContainer,
@@ -18,8 +18,9 @@ import { ScrollingTextComponent } from '../scrolling-text/scrolling-text.compone
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatListItem, MatNavList } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'aws-page-wrapper',
@@ -27,6 +28,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
   styleUrls: ['./page-wrapper.component.scss'],
   imports: [
     RouterOutlet,
+    RouterLink,
     MatSidenavContent,
     MatSidenavContainer,
     ScrollingTextComponent,
@@ -35,22 +37,18 @@ import { MatProgressBar } from '@angular/material/progress-bar';
     MatNavList,
     CommonModule,
     MatButton,
+    MatIconButton,
     MatListItem,
     MatProgressBar,
+    MatIcon,
   ],
 })
 export class PageWrapperComponent implements OnInit, OnDestroy {
   loading$ = this.store.select(selectLoading);
   mobileQuery: MediaQueryList;
   navigationOptions = [
-    {
-      path: 'dashboard',
-      text: 'Dashboard',
-    },
-    {
-      path: 'transactions',
-      text: 'Transactions',
-    },
+    { path: 'dashboard',     text: 'Dashboard',     icon: 'dashboard' },
+    { path: 'transactions',  text: 'Transactions',  icon: 'tune' },
   ];
 
   private _mobileQueryListener: () => void;
@@ -81,7 +79,6 @@ export class PageWrapperComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    // Clear session storage
     if (window.sessionStorage) {
       window.sessionStorage.clear();
     }

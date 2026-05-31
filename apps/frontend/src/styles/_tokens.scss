@@ -1,46 +1,68 @@
-// Design tokens — the single source of truth for colors, spacing, radii,
-// shadows, motion and breakpoints used across the app. Consume with
-// `@use 'tokens' as *;` (resolved via stylePreprocessorOptions.includePaths).
+// Design tokens — the single source of truth for colours, spacing, radii,
+// shadows, motion and breakpoints. Consume with `@use 'tokens' as *;`
+// (resolved via stylePreprocessorOptions.includePaths).
 
-// Brand
-$brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-$brand-gradient-45: linear-gradient(45deg, #667eea, #764ba2);
-$accent-gradient: linear-gradient(45deg, #ff6b6b, #feca57);
+// ─── Backgrounds (dark navy dominant) ────────────────────────────────────────
+$color-bg-base:     #0A1628; // deep ocean — main page background
+$color-bg-surface:  #0F2035; // card surfaces
+$color-bg-elevated: #162840; // modals, dropdowns
+$color-bg-alt:      #0D1F38; // alternate sections (features, footer)
 
-// Colors
-$color-ink: #2c3e50; // headings / strong text
-$color-muted: #7f8c8d; // secondary text
-$color-text: #1a1a1a; // body text
-$color-success: #27ae60;
-$color-success-2: #2ecc71;
-$color-border: #f0f0f0;
-$color-section-alt: #f8f9fa;
-$page-bg: rgb(243, 239, 232);
+// ─── Navy blues ──────────────────────────────────────────────────────────────
+$color-navy:        #1B3A5C;
+$color-navy-light:  #2E5F8A; // hover, links
+$color-ocean:       #1E6091; // interactive elements
 
-// Glass / translucent surfaces
-$glass-bg: rgba(255, 255, 255, 0.1);
-$glass-bg-strong: rgba(255, 255, 255, 0.95);
-$glass-border: rgba(255, 255, 255, 0.2);
+// ─── Gold & sand accent ──────────────────────────────────────────────────────
+$color-gold:        #C9A84C; // antique gold — primary accent
+$color-gold-light:  #E8C97A; // hover state
+$color-gold-dark:   #A08030; // active state
+$color-sand:        #E8D5B7; // warm sand highlight
+$color-cream:       #F5F0E8; // primary text on dark
 
-// Radii
+// ─── Semantic ────────────────────────────────────────────────────────────────
+$color-success:     #2ECC71;
+$color-error:       #E74C3C;
+$color-muted:       #8FA8C0; // nautical grey-blue — secondary text
+
+// ─── Borders ─────────────────────────────────────────────────────────────────
+$color-border:        rgba(201, 168, 76, 0.15); // subtle gold
+$color-border-strong: rgba(201, 168, 76, 0.4);  // clear gold
+
+// ─── Gradients ───────────────────────────────────────────────────────────────
+$brand-gradient:    linear-gradient(135deg, #1B3A5C 0%, #0A1628 100%);
+$brand-gradient-45: linear-gradient(45deg,  #1B3A5C, #0A1628);
+$accent-gradient:   linear-gradient(135deg, #C9A84C 0%, #E8C97A 100%);
+$ocean-gradient:    linear-gradient(180deg, #0A1628 0%, #1E6091 100%);
+
+// ─── Glass / translucent surfaces ────────────────────────────────────────────
+$glass-bg:        rgba(10, 22, 40, 0.7);
+$glass-bg-strong: rgba(10, 22, 40, 0.95);
+$glass-border:    rgba(201, 168, 76, 0.25);
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+$page-bg: $color-bg-base;
+
+// ─── Radii ───────────────────────────────────────────────────────────────────
 $radius-sm: 8px;
 $radius-md: 12px;
 $radius-lg: 16px;
 $radius-xl: 20px;
 
-// Shadows
-$shadow-card: 0 10px 40px rgba(0, 0, 0, 0.1);
-$shadow-card-hover: 0 20px 60px rgba(0, 0, 0, 0.15);
-$shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+// ─── Shadows ─────────────────────────────────────────────────────────────────
+$shadow-card:       0 10px 40px rgba(0, 0, 0, 0.4);
+$shadow-card-hover: 0 20px 60px rgba(0, 0, 0, 0.5);
+$shadow-soft:       0 8px 32px  rgba(0, 0, 0, 0.3);
+$shadow-gold:       0 0  20px   rgba(201, 168, 76, 0.2);
 
-// Motion
+// ─── Motion ──────────────────────────────────────────────────────────────────
 $transition-base: all 0.3s ease;
 
-// Typography
-$font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-  sans-serif;
+// ─── Typography (two-font system) ────────────────────────────────────────────
+$font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
 
-// Breakpoints
+// ─── Breakpoints ─────────────────────────────────────────────────────────────
 $bp-lg: 1024px;
 $bp-md: 768px;
 $bp-sm: 480px;

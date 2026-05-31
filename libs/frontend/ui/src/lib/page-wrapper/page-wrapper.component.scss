@@ -1,35 +1,130 @@
-.example-container {
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+.app-shell {
   display: flex;
   flex-direction: column;
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  inset: 0;
 }
 
-.example-is-mobile .example-toolbar {
+// ─── Toolbar ─────────────────────────────────────────────────────────────────
+.app-toolbar {
+  border-bottom: 1px solid $color-border;
+  gap: 8px;
+  position: relative;
+  z-index: 10;
+}
+
+.is-mobile .app-toolbar {
   position: fixed;
-  /* Make sure the toolbar will stay on top of the content as it scrolls past. */
-  z-index: 2;
+  z-index: 100;
 }
 
-.example-sidenav-container {
-  /* When the sidenav is not fixed, stretch the sidenav container to fill the available space. This
-       causes `<mat-sidenav-content>` to act as our scrolling element for desktop layouts. */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  margin-left: 4px;
+
+  &:hover .wordmark {
+    color: $color-sand;
+  }
+}
+
+.nav-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.nav-spacer {
   flex: 1;
 }
 
-.example-is-mobile .example-sidenav-container {
-  /* When the sidenav is fixed, don't constrain the height of the sidenav container. This allows the
-       `<body>` to be our scrolling element for mobile layouts. */
+aws-scrolling-text {
+  max-width: 400px;
+  overflow: hidden;
+}
+
+// ─── Loading bar ─────────────────────────────────────────────────────────────
+.loading-bar {
+  position: relative;
+  z-index: 9;
+}
+
+// ─── Sidenav container ───────────────────────────────────────────────────────
+.sidenav-container {
+  flex: 1;
+}
+
+.is-mobile .sidenav-container {
   flex: 1 0 auto;
 }
 
-aws-scrolling-text {
-  width: 100%;
+// ─── Sidenav panel ───────────────────────────────────────────────────────────
+.app-sidenav {
+  width: 220px;
+  background-color: $color-bg-surface !important;
+  border-right: 1px solid $color-border !important;
+
+  .sidenav-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  mat-nav-list {
+    flex: 1;
+    padding-top: 16px;
+  }
 }
 
-mat-toolbar {
-  background-color: black;
+// ─── Nav items ───────────────────────────────────────────────────────────────
+.nav-item {
+  border-left: 3px solid transparent;
+  transition: $transition-base;
+  color: $color-muted !important;
+  border-radius: 0 $radius-sm $radius-sm 0;
+  margin-right: 8px;
+
+  mat-icon {
+    color: $color-muted;
+    transition: $transition-base;
+  }
+
+  &:hover {
+    border-left-color: $color-gold;
+    color: $color-cream !important;
+    background-color: rgba(201, 168, 76, 0.07);
+
+    mat-icon {
+      color: $color-gold;
+    }
+  }
+}
+
+// ─── Sidenav footer / logout ─────────────────────────────────────────────────
+.sidenav-footer {
+  padding: 16px 8px;
+  border-top: 1px solid $color-border;
+}
+
+.logout-btn {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 8px;
+  color: $color-muted !important;
+  transition: $transition-base;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    color: $color-error !important;
+  }
 }

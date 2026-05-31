@@ -3,7 +3,7 @@
 @use 'tokens' as *;
 @use 'mixins' as *;
 
-// Reusable button system (primary / secondary / large).
+// ─── Button system ────────────────────────────────────────────────────────────
 .btn {
   padding: 0.75rem 1.5rem;
   border-radius: $radius-sm;
@@ -13,6 +13,8 @@
   border: none;
   cursor: pointer;
   font-size: 0.9rem;
+  font-family: $font-sans;
+  letter-spacing: 0.03em;
 
   &.btn-large {
     padding: 1rem 2rem;
@@ -21,33 +23,80 @@
 
   &.btn-primary {
     background: $accent-gradient;
-    color: white;
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    color: $color-bg-base;
+    box-shadow: $shadow-gold;
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+      box-shadow: 0 8px 25px rgba(201, 168, 76, 0.45);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 
   &.btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: $color-cream;
+    border: 1px solid $color-border-strong;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(201, 168, 76, 0.08);
+      border-color: $color-gold;
+      color: $color-gold;
       transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 }
 
-// Utility: clip the brand gradient onto text.
-.gradient-text {
-  @include gradient-text(linear-gradient(45deg, #fff, #f0f0f0));
+// ─── Wordmark ("sAIlor" with gold AI emphasis) ───────────────────────────────
+.wordmark {
+  font-family: $font-serif;
+  color: $color-cream;
+  letter-spacing: 0.1em;
+  font-style: italic;
+
+  .ai {
+    color: $color-gold;
+    font-style: italic;
+    font-weight: 700;
+  }
 }
 
-// Shared animations.
+// ─── Stat / metric colour classes ────────────────────────────────────────────
+.number-text {
+  color: $color-gold;
+}
+
+.negative {
+  color: $color-error;
+}
+
+.stat-positive {
+  color: $color-success;
+}
+
+.stat-negative {
+  color: $color-error;
+}
+
+.stat-value {
+  color: $color-gold;
+  font-family: $font-serif;
+  font-weight: 700;
+}
+
+// ─── Gradient text utility ────────────────────────────────────────────────────
+.gradient-text {
+  @include gradient-text($accent-gradient);
+}
+
+// ─── Shared animations ────────────────────────────────────────────────────────
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -68,8 +117,8 @@
   }
 }
 
-// Error toast (MatSnackBar panelClass: 'error-snackbar'). Rendered in the CDK
-// overlay, so it must be styled globally rather than in a component stylesheet.
+// ─── Error toast (MatSnackBar panelClass: 'error-snackbar') ──────────────────
+// Rendered in CDK overlay — must be styled globally, not in a component sheet.
 .error-snackbar {
   --mdc-snackbar-container-color: #b00020;
   --mdc-snackbar-supporting-text-color: #fff;

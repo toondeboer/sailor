@@ -1,9 +1,8 @@
 @use 'tokens' as *;
 @use 'mixins' as *;
 
-// Reusable primitives (.btn system, fadeInUp/shimmer keyframes) live in the
-// global stylesheet (apps/frontend/src/styles/_globals.scss) so they are shared
-// app-wide. This file keeps only the landing-page-specific layout.
+// Reusable primitives (.btn, .wordmark, fadeInUp/shimmer, .negative etc.) live in
+// _globals.scss and are shared app-wide. This file is landing-page-specific layout only.
 
 * {
   margin: 0;
@@ -14,8 +13,8 @@
 .app-container {
   font-family: $font-sans;
   line-height: 1.6;
-  color: $color-text;
-  background: $brand-gradient;
+  color: $color-cream;
+  background: $color-bg-base;
   min-height: 100vh;
 }
 
@@ -25,11 +24,9 @@
   padding: 0 20px;
 }
 
-/* Header Styles */
+// ─── Header ──────────────────────────────────────────────────────────────────
 header {
-  background: $glass-bg;
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid $glass-bg;
+  @include glass-panel($glass-bg, 20px);
   position: fixed;
   width: 100%;
   top: 0;
@@ -37,15 +34,16 @@ header {
   transition: $transition-base;
 
   &.scrolled {
-    background: $glass-bg-strong;
-    backdrop-filter: blur(20px);
+    @include glass-panel($glass-bg-strong, 20px);
 
     .logo {
-      color: $color-ink;
+      .wordmark {
+        color: $color-cream;
+      }
     }
 
     .nav-links a {
-      color: $color-ink;
+      color: $color-cream;
     }
   }
 }
@@ -61,23 +59,19 @@ nav {
 .logo {
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: $color-cream;
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   transition: color 0.3s ease;
   z-index: 1001;
 }
 
-.logo-icon {
-  width: 32px;
-  height: 32px;
-  background: $accent-gradient;
-  border-radius: $radius-sm;
-  @include flex-center;
-  font-weight: bold;
-  color: white;
+.logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
 }
 
 .nav-links {
@@ -87,15 +81,14 @@ nav {
   transition: $transition-base;
 
   a {
-    color: white;
+    color: $color-sand;
     text-decoration: none;
     font-weight: 500;
     transition: $transition-base;
-    opacity: 0.9;
     cursor: pointer;
 
     &:hover {
-      opacity: 1;
+      color: $color-gold;
       transform: translateY(-2px);
     }
   }
@@ -106,13 +99,12 @@ nav {
   gap: 1rem;
 }
 
-/* Mobile Menu Styles */
+// ─── Mobile menu ─────────────────────────────────────────────────────────────
 .mobile-menu {
   display: none;
-  background: $glass-bg;
-  backdrop-filter: blur(10px);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  @include glass-panel($glass-bg, 10px);
+  color: $color-cream;
+  border-color: $color-border-strong;
   padding: 0.75rem;
   border-radius: $radius-sm;
   cursor: pointer;
@@ -120,16 +112,13 @@ nav {
   z-index: 1001;
   transition: $transition-base;
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
+  &:hover,
   &.active {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(201, 168, 76, 0.15);
+    border-color: $color-gold;
   }
 }
 
-/* Mobile Navigation Menu */
 .mobile-nav {
   display: none;
   position: fixed;
@@ -137,7 +126,7 @@ nav {
   left: 0;
   width: 100%;
   height: 100vh;
-  background: rgba(102, 126, 234, 0.95);
+  background: $glass-bg-strong;
   backdrop-filter: blur(20px);
   z-index: 1000;
   padding-top: 100px;
@@ -158,17 +147,17 @@ nav {
       margin-bottom: 2rem;
 
       a {
-        color: white;
+        color: $color-cream;
         text-decoration: none;
         font-size: 1.5rem;
         font-weight: 600;
         display: block;
         padding: 1rem 0;
-        border-bottom: 1px solid $glass-bg;
+        border-bottom: 1px solid $color-border;
         transition: $transition-base;
 
         &:hover {
-          color: #feca57;
+          color: $color-gold;
           transform: translateX(10px);
         }
       }
@@ -188,26 +177,32 @@ nav {
   }
 }
 
-/* Hero Section */
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 .hero {
   padding: 8rem 0 4rem;
   text-align: center;
-  color: white;
+  background: $ocean-gradient;
 }
 
 .hero-title {
+  @include serif-heading;
   font-size: 3.5rem;
-  font-weight: 800;
+  font-weight: 700;
   margin-bottom: 1.5rem;
-  @include gradient-text(linear-gradient(45deg, #fff, #f0f0f0));
   animation: fadeInUp 1s ease-out;
+  line-height: 1.2;
+
+  em {
+    @include gradient-text($accent-gradient);
+    font-style: normal;
+  }
 }
 
 .hero-subtitle {
   font-size: 1.25rem;
   margin-bottom: 2rem;
-  opacity: 0.9;
-  max-width: 600px;
+  color: $color-sand;
+  max-width: 620px;
   margin-left: auto;
   margin-right: auto;
   animation: fadeInUp 1s ease-out 0.2s both;
@@ -228,7 +223,7 @@ nav {
 }
 
 .chart-container {
-  background: $glass-bg-strong;
+  background: $color-bg-elevated;
   border-radius: $radius-md;
   padding: 1.5rem;
   margin-bottom: 1rem;
@@ -240,7 +235,7 @@ nav {
   background: $brand-gradient-45;
   border-radius: $radius-sm;
   @include flex-center;
-  color: white;
+  color: $color-cream;
   font-weight: 600;
   position: relative;
   overflow: hidden;
@@ -253,12 +248,12 @@ nav {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.2), transparent);
     animation: shimmer 2s infinite;
   }
 
   &.loaded {
-    background: linear-gradient(45deg, $color-success, $color-success-2);
+    background: linear-gradient(135deg, $color-ocean, $color-success);
 
     &::before {
       animation: none;
@@ -273,16 +268,16 @@ nav {
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.9);
+  @include nautical-card;
   padding: 1rem;
-  border-radius: $radius-sm;
   text-align: center;
 }
 
 .stat-value {
+  font-family: $font-serif;
   font-size: 1.5rem;
-  font-weight: bold;
-  color: $color-ink;
+  font-weight: 700;
+  color: $color-gold;
 
   &.positive {
     color: $color-success;
@@ -291,21 +286,24 @@ nav {
 
 .stat-label {
   color: $color-muted;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
 }
 
-/* Features Section */
+// ─── Features ────────────────────────────────────────────────────────────────
 .features {
-  padding: 4rem 0;
-  background: white;
+  padding: 5rem 0;
+  background: $color-bg-alt;
 }
 
 .section-title {
+  @include serif-heading;
   text-align: center;
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 3rem;
-  color: $color-ink;
 }
 
 .features-grid {
@@ -316,46 +314,27 @@ nav {
 }
 
 .feature-card {
-  background: white;
-  border-radius: $radius-lg;
+  @include nautical-card;
   padding: 2rem;
   text-align: center;
-  box-shadow: $shadow-card;
-  transition: $transition-base;
-  border: 1px solid $color-border;
-  cursor: pointer;
+  cursor: default;
 
-  &:hover {
-    transform: translateY(-10px);
-    box-shadow: $shadow-card-hover;
-  }
-
-  &:nth-child(1) .feature-icon {
-    background: $accent-gradient;
-  }
-
-  &:nth-child(2) .feature-icon {
-    background: linear-gradient(45deg, #4ecdc4, #44a08d);
-  }
-
-  &:nth-child(3) .feature-icon {
-    background: $brand-gradient-45;
-  }
-
-  &:nth-child(4) .feature-icon {
-    background: linear-gradient(45deg, #f093fb, #f5576c);
-  }
+  &:nth-child(1) .feature-icon { background: $accent-gradient; }
+  &:nth-child(2) .feature-icon { background: linear-gradient(135deg, $color-ocean, $color-navy-light); }
+  &:nth-child(3) .feature-icon { background: linear-gradient(135deg, #2ECC71, #1a9e56); }
+  &:nth-child(4) .feature-icon { background: linear-gradient(135deg, #8FA8C0, $color-ocean); }
 
   h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: $color-ink;
+    @include serif-heading;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
   }
 
   p {
     color: $color-muted;
-    line-height: 1.6;
+    line-height: 1.7;
+    font-size: 0.95rem;
   }
 }
 
@@ -366,14 +345,12 @@ nav {
   margin: 0 auto 1.5rem;
   @include flex-center;
   font-size: 2rem;
-  font-weight: bold;
-  color: white;
 }
 
-/* How It Works Section */
+// ─── How It Works ─────────────────────────────────────────────────────────────
 .how-it-works {
-  padding: 4rem 0;
-  background: $color-section-alt;
+  padding: 5rem 0;
+  background: $color-bg-base;
 }
 
 .steps {
@@ -387,16 +364,22 @@ nav {
   text-align: center;
   position: relative;
   animation: fadeInUp 1s ease-out both;
+  padding: 2rem;
+  border-radius: $radius-lg;
+  background: $color-bg-surface;
+  border: 1px solid $color-border;
 
   h3 {
+    @include serif-heading;
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 0.5rem;
-    color: $color-ink;
   }
 
   p {
     color: $color-muted;
+    line-height: 1.7;
+    font-size: 0.95rem;
   }
 }
 
@@ -404,43 +387,62 @@ nav {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: $brand-gradient-45;
-  color: white;
+  background: $accent-gradient;
+  color: $color-bg-base;
   @include flex-center;
   font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0 auto 1rem;
+  font-weight: 700;
+  margin: 0 auto 1.25rem;
+  font-family: $font-serif;
 }
 
-/* CTA Section */
+// ─── CTA Section ─────────────────────────────────────────────────────────────
 .cta-section {
-  padding: 4rem 0;
+  padding: 5rem 0;
   background: $brand-gradient;
-  color: white;
+  color: $color-cream;
   text-align: center;
+  border-top: 1px solid $color-border;
 
   h2 {
+    @include serif-heading;
     font-size: 2.5rem;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 1rem;
   }
 
   p {
-    font-size: 1.25rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
+    font-size: 1.2rem;
+    margin-bottom: 2.5rem;
+    color: $color-sand;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
-/* Footer */
+// ─── Footer ──────────────────────────────────────────────────────────────────
 footer {
-  background: $color-ink;
-  color: white;
-  padding: 2rem 0;
+  background: $color-bg-alt;
+  color: $color-muted;
+  padding: 2.5rem 0;
   text-align: center;
+  border-top: 1px solid $color-border;
+
+  .footer-brand {
+    margin-bottom: 1rem;
+
+    .wordmark {
+      font-size: 1.25rem;
+    }
+  }
+
+  p {
+    font-size: 0.85rem;
+  }
 }
 
-/* Mobile Responsive */
+// ─── Responsive ──────────────────────────────────────────────────────────────
 @include respond-to($bp-lg) {
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -448,24 +450,11 @@ footer {
 }
 
 @include respond-to($bp-md) {
-  /* Mobile Header */
-  .nav-links {
-    display: none;
-  }
+  .nav-links    { display: none; }
+  .cta-buttons  { display: none; }
+  .mobile-menu  { display: block; }
+  .mobile-nav   { display: block; }
 
-  .cta-buttons {
-    display: none;
-  }
-
-  .mobile-menu {
-    display: block;
-  }
-
-  .mobile-nav {
-    display: block;
-  }
-
-  /* Hero Section Mobile */
   .hero {
     padding: 6rem 0 3rem;
   }
@@ -478,46 +467,23 @@ footer {
     font-size: 1.1rem;
   }
 
-  .dashboard-preview {
-    padding: 1rem;
-  }
+  .dashboard-preview { padding: 1rem; }
+  .chart-container   { padding: 1rem; }
+  .chart-placeholder { height: 150px; }
 
-  .chart-container {
-    padding: 1rem;
-  }
-
-  .chart-placeholder {
-    height: 150px;
-  }
-
-  /* Features Mobile */
   .features-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
 
-  .feature-card {
-    padding: 1.5rem;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-
-  /* CTA Mobile */
-  .cta-section h2 {
-    font-size: 2rem;
-  }
-
-  .cta-section p {
-    font-size: 1.1rem;
-  }
+  .feature-card { padding: 1.5rem; }
+  .section-title { font-size: 2rem; }
+  .cta-section h2 { font-size: 2rem; }
+  .cta-section p  { font-size: 1.1rem; }
 }
 
 @include respond-to($bp-sm) {
-  .container {
-    padding: 0 15px;
-  }
+  .container { padding: 0 15px; }
 
   .hero-title {
     font-size: 2rem;
@@ -542,11 +508,6 @@ footer {
     font-size: 1.5rem;
   }
 
-  .section-title {
-    font-size: 1.75rem;
-  }
-
-  .cta-section h2 {
-    font-size: 1.75rem;
-  }
+  .section-title { font-size: 1.75rem; }
+  .cta-section h2 { font-size: 1.75rem; }
 }
