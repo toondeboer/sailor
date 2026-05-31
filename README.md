@@ -21,7 +21,20 @@ DynamoDB** backend (managed with AWS SAM), authenticated with **Cognito**. See
 
 ```
 yarn install          # frontend + Nx toolchain
-python3 -m pip install -r services/requirements-dev.txt   # Lambda deps + boto3 for local dev / IDE
+```
+
+Create a virtual environment for the Python backend (one-time setup):
+
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r services/requirements-dev.txt
+```
+
+Activate the venv in any new terminal before running Python scripts or `sam build`:
+
+```
+source .venv/bin/activate
 ```
 
 ## Run locally
