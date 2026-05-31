@@ -1,72 +1,134 @@
-<div *ngIf="yahoo$ | async as yahoo" class="grid">
-  <aws-bar-chart-per-quarter-by-year [series]="chartData?.dividend?.perQuarterByYear ?? []">
-  </aws-bar-chart-per-quarter-by-year>
-  <aws-bar-and-line-chart [series]="chartData?.dividend?.ttmPerQuarter ?? {yearQuarters: [], dividends:[]}"></aws-bar-and-line-chart>
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.portfolioValues ?? []"
-    label="Portfolio"
-  ></aws-chart>
+<!-- ─── Performance ──────────────────────────────────────────────────────── -->
+<div class="chart-section">
+  <h3 class="section-title">Performance</h3>
+  <div class="charts-grid">
 
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.profit ?? []"
-    label="Profit"
-  ></aws-chart>
-  <aws-bar-chart [series]="chartData?.yieldPerYear ?? {years: [], yields: [], profit: []}"></aws-bar-chart>
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.portfolioValues ?? []"
+        label="Portfolio Value"
+      ></aws-chart>
+    </div>
 
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.dividend?.transactionValues ?? []"
-    label="Dividend (Kwartaal)"
-    [showSymbols]="true"
-  ></aws-chart>
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.profit ?? []"
+        label="Profit"
+      ></aws-chart>
+    </div>
 
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.dividend?.aggregatedValues ?? []"
-    label="Aggregated Dividend"
-  ></aws-chart>
+    <div class="chart-card">
+      <aws-bar-chart
+        [series]="chartData?.yieldPerYear ?? { years: [], yields: [], profit: [] }"
+      ></aws-bar-chart>
+    </div>
 
-  <ng-container *ngFor="let ticker of Object.keys(yahoo.tickers)">
-    <aws-chart
-      [x]="yahoo.tickers[ticker].dates"
-      [y]="yahoo.tickers[ticker].values"
-      [label]="'Yahoo Data: ' + ticker"
-    ></aws-chart>
-  </ng-container>
+  </div>
+</div>
 
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.commission?.aggregatedValues ?? []"
-    label="Aggregated Commission"
-  ></aws-chart>
+<!-- ─── Dividends ────────────────────────────────────────────────────────── -->
+<div class="chart-section">
+  <h3 class="section-title">Dividends</h3>
+  <div class="charts-grid">
 
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.stock?.transactionValues ?? []"
-    label="Transactions Values"
-    [showSymbols]="true"
-  ></aws-chart>
+    <div class="chart-card">
+      <aws-bar-chart-per-quarter-by-year
+        [series]="chartData?.dividend?.perQuarterByYear ?? []"
+      ></aws-bar-chart-per-quarter-by-year>
+    </div>
 
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.stock?.aggregatedValues ?? []"
-    label="Aggregated Transactions Values"
-  ></aws-chart>
+    <div class="chart-card">
+      <aws-bar-and-line-chart
+        [series]="chartData?.dividend?.ttmPerQuarter ?? { yearQuarters: [], dividends: [] }"
+      ></aws-bar-and-line-chart>
+    </div>
 
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.stock?.transactionAmounts ?? []"
-    label="Transactions Amounts"
-    [money]="false"
-    [showSymbols]="true"
-  ></aws-chart>
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.dividend?.transactionValues ?? []"
+        label="Dividend per Quarter"
+        [showSymbols]="true"
+      ></aws-chart>
+    </div>
 
-  <aws-chart
-    [x]="dates"
-    [y]="chartData?.stock?.aggregatedAmounts ?? []"
-    label="Aggregated Transactions Amounts"
-    [money]="false"
-  ></aws-chart>
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.dividend?.aggregatedValues ?? []"
+        label="Cumulative Dividend"
+      ></aws-chart>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── Holdings (live Yahoo prices) ─────────────────────────────────────── -->
+<div class="chart-section" *ngIf="yahoo$ | async as yahoo">
+  <h3 class="section-title">Holdings</h3>
+  <div class="charts-grid">
+
+    <div class="chart-card" *ngFor="let ticker of Object.keys(yahoo.tickers)">
+      <aws-chart
+        [x]="yahoo.tickers[ticker].dates"
+        [y]="yahoo.tickers[ticker].values"
+        [label]="ticker"
+      ></aws-chart>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── Transactions ──────────────────────────────────────────────────────── -->
+<div class="chart-section">
+  <h3 class="section-title">Transactions</h3>
+  <div class="charts-grid">
+
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.stock?.transactionValues ?? []"
+        label="Buy / Sell Values"
+        [showSymbols]="true"
+      ></aws-chart>
+    </div>
+
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.stock?.aggregatedValues ?? []"
+        label="Cumulative Invested"
+      ></aws-chart>
+    </div>
+
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.stock?.transactionAmounts ?? []"
+        label="Buy / Sell Amounts"
+        [money]="false"
+        [showSymbols]="true"
+      ></aws-chart>
+    </div>
+
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.stock?.aggregatedAmounts ?? []"
+        label="Cumulative Shares Held"
+        [money]="false"
+      ></aws-chart>
+    </div>
+
+    <div class="chart-card">
+      <aws-chart
+        [x]="dates"
+        [y]="chartData?.commission?.aggregatedValues ?? []"
+        label="Cumulative Commission"
+      ></aws-chart>
+    </div>
+
+  </div>
 </div>
