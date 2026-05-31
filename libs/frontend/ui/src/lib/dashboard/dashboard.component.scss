@@ -1,0 +1,30 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+.page {
+  padding: 32px 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 8px;
+}
+
+.page-title {
+  @include serif-heading;
+  font-size: 2rem;
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  color: $color-muted;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.page-section {
+  margin-top: 24px;
+}

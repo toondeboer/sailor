@@ -105,7 +105,7 @@ aws-scrolling-text {
     transition: $transition-base;
   }
 
-  &:hover {
+  &:hover, &.active {
     border-left-color: $color-gold;
     color: $color-cream !important;
     background-color: rgba(201, 168, 76, 0.07);
@@ -113,6 +113,10 @@ aws-scrolling-text {
     mat-icon {
       color: $color-gold;
     }
+  }
+
+  &.active {
+    background-color: rgba(201, 168, 76, 0.12);
   }
 }
 

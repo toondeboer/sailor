@@ -36,6 +36,7 @@
           <a
             mat-list-item
             class="nav-item"
+            [class.active]="isActive(nav.path)"
             *ngFor="let nav of navigationOptions"
             (click)="routeTo(nav.path, snav)"
           >

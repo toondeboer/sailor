@@ -68,3 +68,6 @@ covers conventions and gotchas that aren't obvious from the code.
 - Before pushing, run `nx run-many -t lint test build --all` — green across all 6 projects is the bar.
 - `strict` and `noImplicitOverride` are on; **`noUncheckedIndexedAccess` is deliberately off** — it's
   the one remaining (optional) hardening item, best done module-by-module across `libs/shared/util`.
+- **After every set of changes: commit and open a PR.** The user reviews by commenting on the PR or
+  making a separate follow-up commit if they disagree — never hold back a commit waiting for verbal
+  approval.

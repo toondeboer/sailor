@@ -72,6 +72,10 @@ export class PageWrapperComponent implements OnInit, OnDestroy {
     this.mobileQuery.removeListener(this._mobileQueryListener);
   }
 
+  isActive(path: string): boolean {
+    return this.router.url === '/' + path || this.router.url.startsWith('/' + path + '/');
+  }
+
   routeTo(route: string, snav: MatSidenav) {
     snav.close();
     this.router.navigate([route]);
