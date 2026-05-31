@@ -45,11 +45,9 @@ covers conventions and gotchas that aren't obvious from the code.
 
 ## Build / deploy gotchas
 
-- **Lambdas are bundled with esbuild** (`libs/backend/lambdas/build.mjs`), with `@aws-sdk` left
-  external (the runtime provides it). This exists because the Lambda packages are Yarn-workspace
-  members, so their deps hoist to the **root** `node_modules` — you cannot `zip <lambda>/node_modules`.
-  `template.yaml`'s `CodeUri` points at `dist/lambdas/<name>/`, so run `build.mjs` before
-  `sam local` / deploy.
+- **Lambdas are Python 3.13** (`services/`). `sam build` installs `services/requirements.txt` into
+  each function's deployment package — run it before `sam local start-api` or deploy. `boto3` is
+  provided by the Lambda runtime and is not in `requirements.txt`.
 - **CORS is handled in the Lambda**, not API Gateway: an origin allowlist that reflects the request
   `Origin`, and both routes use `Method: any` so the Lambda answers the `OPTIONS` preflight **before**
   the auth check (browsers omit `Authorization` on preflight).
@@ -59,13 +57,14 @@ covers conventions and gotchas that aren't obvious from the code.
 - The `Investment_Tracker` table is **referenced, not managed** by the SAM stack (so a deploy can't
   wipe data).
 - Auth: the frontend sends the raw Cognito **ID token** (no `Bearer` prefix) in `Authorization`; the
-  Lambda **verifies** it against the Cognito JWKS (`jwt.verify`, not `jwt.decode`).
+  Lambda **verifies** it against the Cognito JWKS (`jwt.decode` with `algorithms=['RS256']` via
+  PyJWT, not just `get_unverified_claims`). JWKS keys are cached at module level for warm starts.
 
 ## Workflow
 
 - Work in small, focused branches off `main` + PRs; never commit to `main` directly. CI
   (`nx affected -t lint test build`) gates merges.
-- Before pushing, run `nx run-many -t lint test build --all` — green across all 6 projects is the bar.
+- Before pushing, run `nx run-many -t lint test build --all` — green across all 5 JS projects is the bar.
 - `strict` and `noImplicitOverride` are on; **`noUncheckedIndexedAccess` is deliberately off** — it's
   the one remaining (optional) hardening item, best done module-by-module across `libs/shared/util`.
 - **After every set of changes: commit and open a PR.** The user reviews by commenting on the PR or

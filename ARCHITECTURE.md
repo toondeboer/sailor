@@ -1,6 +1,6 @@
 # Architecture
 
-An [Nx](https://nx.dev) monorepo: an **Angular 19 + NgRx** frontend and an **AWS Lambda +
+An [Nx](https://nx.dev) monorepo: an **Angular 19 + NgRx** frontend and a **Python AWS Lambda +
 DynamoDB** backend (managed with AWS SAM), authenticated with **Cognito (OIDC)**. It tracks a
 stock/dividend portfolio, imports DEGIRO CSV exports, and pulls prices from Yahoo Finance.
 
@@ -16,7 +16,12 @@ libs/
   frontend/state/      NgRx "state" slice — portfolio transactions
   frontend/yahoo/      NgRx "yahoo" slice — price tickers
   shared/util/         Framework-agnostic domain logic (pure, heavily unit-tested)
-  backend/lambdas/     AWS Lambda handlers (dynamodb CRUD + auth, yahoo price fetch)
+services/
+  handler_dynamodb.py  DynamoDB Lambda — CRUD + Cognito JWT auth
+  handler_yahoo.py     Yahoo Finance Lambda — fan-out price fetch
+  shared/              Shared utilities (cors.py, auth.py)
+  requirements.txt     Python dependencies for all Lambdas
+  init_dynamodb.py     One-time local dev table setup
 ```
 
 Module boundaries are enforced by `@nx/enforce-module-boundaries`. Dependencies flow one way:
@@ -81,15 +86,16 @@ a user can only read/write their own data.
 
 ## Backend
 
-Two Node 22 Lambdas behind one API Gateway:
+Two Python 3.13 Lambdas behind one API Gateway:
 
-- **dynamodb** — CRUD over the `Investment_Tracker` table (partition key = Cognito `sub`); verifies
-  the JWT; CORS via an origin allowlist that reflects the request `Origin`.
-- **yahoo** — fans out to the Yahoo Finance API for the requested symbols (`Promise.allSettled`,
-  per-request timeout), returning per-symbol results.
+- **dynamodb** (`handler_dynamodb.py`) — CRUD over the `Investment_Tracker` table (partition key =
+  Cognito `sub`); verifies the Cognito ID token's signature via JWKS; CORS via an origin allowlist
+  that reflects the request `Origin`.
+- **yahoo** (`handler_yahoo.py`) — fans out to the Yahoo Finance API for the requested symbols
+  (`ThreadPoolExecutor`, per-request timeout), returning per-symbol results.
 
-Handlers are bundled with esbuild ([libs/backend/lambdas/build.mjs]) into a single self-contained
-file each (`@aws-sdk` left external — the runtime provides it).
+`sam build` packages each handler with `services/requirements.txt` (PyJWT + cryptography);
+`boto3` is provided by the Lambda Python runtime and not bundled.
 
 ## Infrastructure & CI
 

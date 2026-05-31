@@ -11,6 +11,7 @@ dynamodb.zip
 
 # dependencies
 node_modules
+.venv
 
 # IDEs and editors
 /.idea
