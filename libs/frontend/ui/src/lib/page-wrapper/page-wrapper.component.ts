@@ -1,7 +1,6 @@
 import {
   ChangeDetectorRef,
   Component,
-  Inject,
   OnDestroy,
   OnInit,
 } from '@angular/core';
@@ -57,7 +56,6 @@ export class PageWrapperComponent implements OnInit, OnDestroy {
     media: MediaMatcher,
     private readonly router: Router,
     private store: Store,
-    @Inject('ENVIRONMENT') private environment: any
   ) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
     this._mobileQueryListener = () => changeDetectorRef.detectChanges();
@@ -82,16 +80,7 @@ export class PageWrapperComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    if (window.sessionStorage) {
-      window.sessionStorage.clear();
-    }
-
-    const clientId = '3o34bbl92faeo9ljo11eebtim2';
-    const logoutUri = `${this.environment.baseUrl}/callback`;
-    const cognitoDomain =
-      'https://us-east-1licb4lgde.auth.us-east-1.amazoncognito.com';
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-      logoutUri
-    )}`;
+    window.sessionStorage.clear();
+    this.router.navigate(['/login']);
   }
 }

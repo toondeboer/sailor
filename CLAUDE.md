@@ -7,6 +7,7 @@
 * AppComponent must remain non-standalone.
 * state must never import yahoo.
 * Portfolio calculations belong in computePortfolioState(), not reducers.
+* The product name is always written **sailor** — all lowercase, including at the start of a sentence or heading.
 
 ## Testing
 
