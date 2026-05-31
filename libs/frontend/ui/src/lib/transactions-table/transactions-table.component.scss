@@ -241,7 +241,7 @@
 }
 
 select.form-control {
-  padding-right: 32px;
+  @include themed-select;
 }
 
 .form-actions {
