@@ -56,18 +56,19 @@
 }
 
 .field-select {
+  @include themed-select;
   background: $color-bg-base;
   border: 1px solid $color-border-strong;
   border-radius: $radius-sm;
-  padding: 10px 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 14px;
   color: $color-cream;
   font-family: $font-sans;
   font-size: 0.9rem;
   width: 200px;
   outline: none;
   transition: $transition-base;
-  cursor: pointer;
-  appearance: auto;
 
   option {
     background: $color-bg-base;

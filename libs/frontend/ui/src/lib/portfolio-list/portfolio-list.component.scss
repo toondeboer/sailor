@@ -110,7 +110,10 @@
 .action-btn {
   width: 28px !important;
   height: 28px !important;
-  line-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
   color: $color-muted !important;
   transition: color 0.15s;
 
@@ -118,11 +121,19 @@
     color: $color-gold !important;
   }
 
+  .mat-mdc-button-touch-target {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
   mat-icon {
     font-size: 16px;
     width: 16px;
     height: 16px;
     line-height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
