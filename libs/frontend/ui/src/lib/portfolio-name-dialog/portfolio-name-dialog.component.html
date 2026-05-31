@@ -1,11 +1,22 @@
-<h2 mat-dialog-title>{{ data.title }}</h2>
-<mat-dialog-content>
-  <mat-form-field appearance="outline" style="width: 100%">
-    <mat-label>Portfolio name</mat-label>
-    <input matInput [(ngModel)]="name" (keyup.enter)="confirm()" autofocus />
-  </mat-form-field>
+<h2 class="dialog-title">{{ data.title }}</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="field-group">
+    <label class="field-label">Name</label>
+    <input
+      class="field-input"
+      type="text"
+      [(ngModel)]="name"
+      (keyup.enter)="confirm()"
+      placeholder="e.g. DEGIRO, Long-term, ISA…"
+      autofocus
+    />
+  </div>
 </mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-flat-button color="primary" (click)="confirm()" [disabled]="!name.trim()">Confirm</button>
-</mat-dialog-actions>
+
+<div class="dialog-actions">
+  <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+  <button class="btn btn-primary" (click)="confirm()" [disabled]="!name.trim()">
+    Confirm
+  </button>
+</div>

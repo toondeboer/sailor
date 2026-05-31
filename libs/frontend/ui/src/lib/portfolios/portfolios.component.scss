@@ -1,20 +1,27 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
 .portfolios-layout {
   display: flex;
-  height: calc(100vh - 64px);
+  height: 100%;
   overflow: hidden;
 }
 
 .portfolios-sidebar {
   width: 260px;
   min-width: 260px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid rgba(201, 168, 76, 0.15);
 }
 
 .portfolios-main {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }

@@ -4,15 +4,15 @@
   </div>
 
   <div class="settings-card">
-    <h2 class="settings-section-title">Display currency</h2>
-    <p class="settings-description">
-      All portfolio values on the dashboard will be converted to this currency using historical exchange rates.
+    <h2 class="card-title">Display currency</h2>
+    <p class="card-description">
+      All portfolio values on the dashboard will be shown in this currency using historical exchange rates.
     </p>
-    <mat-form-field appearance="outline" class="currency-field">
-      <mat-label>Base currency</mat-label>
-      <mat-select [(ngModel)]="selectedCurrency" (ngModelChange)="onCurrencyChange($event)">
-        <mat-option *ngFor="let c of currencies" [value]="c">{{ c }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="field-group">
+      <label class="field-label">Base currency</label>
+      <select class="field-select" [(ngModel)]="selectedCurrency" (ngModelChange)="onCurrencyChange($event)">
+        <option *ngFor="let c of currencies" [value]="c">{{ c }}</option>
+      </select>
+    </div>
   </div>
 </div>

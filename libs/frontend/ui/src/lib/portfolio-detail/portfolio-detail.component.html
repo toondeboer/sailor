@@ -1,9 +1,8 @@
 <div class="portfolio-detail" *ngIf="portfolio; else noSelection">
   <div class="detail-header">
     <h2 class="detail-title">{{ portfolio.name }}</h2>
-    <button mat-stroked-button (click)="importCsv.emit(portfolio.id)" class="import-btn">
-      <mat-icon>upload</mat-icon>
-      Import CSV
+    <button class="btn btn-secondary import-btn" (click)="importCsv.emit(portfolio.id)">
+      &#8593; Import CSV
     </button>
   </div>
 
@@ -15,7 +14,7 @@
 
 <ng-template #noSelection>
   <div class="no-selection">
-    <mat-icon class="no-selection-icon">folder_open</mat-icon>
+    <span class="no-selection-icon">&#128193;</span>
     <p>Select a portfolio to view transactions</p>
   </div>
 </ng-template>

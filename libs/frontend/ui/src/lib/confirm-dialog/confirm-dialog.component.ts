@@ -1,7 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
 
 export type ConfirmDialogData = {
   title: string;
@@ -12,7 +11,8 @@ export type ConfirmDialogData = {
 @Component({
   selector: 'aws-confirm-dialog',
   templateUrl: './confirm-dialog.component.html',
-  imports: [CommonModule, MatDialogModule, MatButtonModule],
+  styleUrls: ['./confirm-dialog.component.scss'],
+  imports: [CommonModule, MatDialogModule],
 })
 export class ConfirmDialogComponent {
   constructor(

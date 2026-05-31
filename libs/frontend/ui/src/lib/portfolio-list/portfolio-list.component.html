@@ -1,7 +1,7 @@
 <div class="portfolio-list">
   <div class="list-header">
-    <h2 class="list-title">Portfolios</h2>
-    <button mat-icon-button (click)="createPortfolio.emit()" matTooltip="New portfolio">
+    <span class="list-title">Portfolios</span>
+    <button mat-icon-button class="add-btn" (click)="createPortfolio.emit()" title="New portfolio">
       <mat-icon>add</mat-icon>
     </button>
   </div>
@@ -17,20 +17,21 @@
         <div class="portfolio-name">{{ portfolio.name }}</div>
         <div class="portfolio-count">{{ transactionCount(portfolio) }} transactions</div>
       </div>
+
       <div class="portfolio-actions" (click)="$event.stopPropagation()">
         <button
           mat-icon-button
           class="action-btn"
+          title="Rename"
           (click)="renamePortfolio.emit(portfolio)"
-          matTooltip="Rename"
         >
           <mat-icon>edit</mat-icon>
         </button>
         <button
           mat-icon-button
           class="action-btn delete-btn"
+          title="Delete"
           (click)="deletePortfolio.emit(portfolio)"
-          matTooltip="Delete"
         >
           <mat-icon>delete</mat-icon>
         </button>
@@ -38,7 +39,7 @@
     </div>
 
     <div *ngIf="portfolios.length === 0" class="empty-state">
-      No portfolios yet. Create one to get started.
+      No portfolios yet.<br />Click + to create one.
     </div>
   </div>
 </div>

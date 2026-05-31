@@ -124,3 +124,17 @@
   --mdc-snackbar-supporting-text-color: #fff;
   --mat-snack-bar-button-color: #fff;
 }
+
+// ─── Material Dialog — override CDK overlay background to match theme ─────────
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: #{$color-bg-elevated};
+  --mdc-dialog-subhead-color: #{$color-cream};
+  --mdc-dialog-supporting-text-color: #{$color-muted};
+
+  .mat-mdc-dialog-surface {
+    background-color: $color-bg-elevated !important;
+    border: 1px solid $color-border-strong;
+    border-radius: $radius-md !important;
+    box-shadow: $shadow-card;
+  }
+}

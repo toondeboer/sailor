@@ -4,8 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { Papa } from 'ngx-papaparse';
 
 export type CsvUploadDialogData = { portfolioId: string };
@@ -21,13 +19,14 @@ export type CsvUploadResult = {
   selector: 'aws-csv-upload-dialog',
   templateUrl: './csv-upload-dialog.component.html',
   styleUrls: ['./csv-upload-dialog.component.scss'],
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatRadioModule, MatSelectModule, MatFormFieldModule],
+  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatRadioModule],
 })
 export class CsvUploadDialogComponent {
   format: 'degiro' | 'yahoo' = 'degiro';
   mode: 'replace' | 'merge' = 'replace';
   fileName = '';
   rows: unknown[] = [];
+  isDragging = false;
 
   constructor(
     public dialogRef: MatDialogRef<CsvUploadDialogComponent, CsvUploadResult | undefined>,
@@ -39,7 +38,30 @@ export class CsvUploadDialogComponent {
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file) return;
+    if (file) this.parseFile(file);
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.parseFile(file);
+  }
+
+  private parseFile(file: File) {
     this.fileName = file.name;
     this.papa.parse(file, {
       header: true,
