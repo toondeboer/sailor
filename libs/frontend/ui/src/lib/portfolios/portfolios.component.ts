@@ -9,10 +9,10 @@ import {
   importDeGiroCsv,
   importYahooCsv,
   renamePortfolio,
+  selectAllPortfolioStates,
   selectPortfoliosDbo,
-  selectState,
 } from '@aws/state';
-import { PortfolioDbo } from '@aws/util';
+import { PortfolioDbo, Stock } from '@aws/util';
 import { PortfolioListComponent } from '../portfolio-list/portfolio-list.component';
 import { PortfolioDetailComponent } from '../portfolio-detail/portfolio-detail.component';
 import {
@@ -37,7 +37,7 @@ import {
 })
 export class PortfoliosComponent implements OnInit {
   portfolios$ = this.store.select(selectPortfoliosDbo);
-  state$ = this.store.select(selectState);
+  allPortfolioStates$ = this.store.select(selectAllPortfolioStates);
   selectedPortfolioId: string | null = null;
 
   constructor(private store: Store, private dialog: MatDialog) {}
@@ -54,6 +54,13 @@ export class PortfoliosComponent implements OnInit {
 
   getSelectedPortfolio(portfolios: PortfolioDbo[]): PortfolioDbo | null {
     return portfolios.find((p) => p.id === this.selectedPortfolioId) ?? null;
+  }
+
+  getSelectedPortfolioStocks(
+    allStates: { [id: string]: { stocks: { [ticker: string]: Stock } } } | null
+  ): { [ticker: string]: Stock } {
+    if (!allStates || !this.selectedPortfolioId) return {};
+    return allStates[this.selectedPortfolioId]?.stocks ?? {};
   }
 
   onSelectPortfolio(id: string) {

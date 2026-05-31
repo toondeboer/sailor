@@ -219,6 +219,7 @@
   border-radius: $radius-sm;
   padding: 8px 12px;
   color: $color-cream;
+
   font-family: $font-sans;
   font-size: 0.9rem;
   transition: $transition-base;
@@ -237,6 +238,10 @@
     background: $color-bg-elevated;
     color: $color-cream;
   }
+}
+
+select.form-control {
+  padding-right: 32px;
 }
 
 .form-actions {
