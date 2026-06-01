@@ -225,6 +225,8 @@ export function computePortfolioState(
   let aggregatedPortfolioValues: number[] = [];
   let aggregatedProfit: number[] = [];
   let chartTotalDividendSummary = 0;
+  let chartTotalInvestedSummary = 0;
+  let chartTotalCommissionSummary = 0;
 
   const chartedStocks: { [ticker: string]: Stock } = {};
   for (const key of Object.keys(computedStocks)) {
@@ -254,7 +256,19 @@ export function computePortfolioState(
     let portfolioValues = portfolioValuesNative;
     let investedForProfit = stock.chartData.stock.aggregatedValues;
     let commissionForProfit = stock.chartData.commission.aggregatedValues;
+    let stockTransactionValues = stock.chartData.stock.transactionValues;
+    let commissionTransactionValues = stock.chartData.commission.transactionValues;
     let currentSharePrice = getMostRecentValueFromList(ticker.values).value;
+
+    // Compute updated dividends (uses price data for per-share amounts).
+    const updatedDividend = updateDividends(
+      stock.chartData.dividend,
+      stock.chartData.stock.aggregatedAmounts,
+      ticker,
+      dates,
+      startDate
+    );
+    let convertedDividend = updatedDividend;
 
     if (fxTicker) {
       const fxRates = getFxRates(dates, fxTicker);
@@ -264,8 +278,28 @@ export function computePortfolioState(
       portfolioValues = multiplyLists(portfolioValuesNative, scaledRates);
       investedForProfit = multiplyLists(stock.chartData.stock.aggregatedValues, scaledRates);
       commissionForProfit = multiplyLists(stock.chartData.commission.aggregatedValues, scaledRates);
+      stockTransactionValues = multiplyLists(stock.chartData.stock.transactionValues, scaledRates);
+      commissionTransactionValues = multiplyLists(stock.chartData.commission.transactionValues, scaledRates);
       const lastScaledRate = getMostRecentValueFromList(scaledRates).value;
       currentSharePrice = currentSharePrice * lastScaledRate;
+
+      convertedDividend = {
+        ...updatedDividend,
+        transactionValues: multiplyLists(updatedDividend.transactionValues, scaledRates),
+        aggregatedValues: multiplyLists(updatedDividend.aggregatedValues, scaledRates),
+        perQuarter: {
+          ...updatedDividend.perQuarter,
+          dividends: updatedDividend.perQuarter.dividends.map(v => v * lastScaledRate),
+        },
+        ttmPerQuarter: {
+          ...updatedDividend.ttmPerQuarter,
+          dividends: updatedDividend.ttmPerQuarter.dividends.map(v => v * lastScaledRate),
+        },
+        perQuarterByYear: updatedDividend.perQuarterByYear.map(pqby => ({
+          year: pqby.year,
+          data: pqby.data.map(v => v * lastScaledRate),
+        })),
+      };
     }
 
     aggregatedPortfolioValues =
@@ -291,18 +325,15 @@ export function computePortfolioState(
 
     const yieldPerYear = getYieldPerYear(dates, portfolioValues, profit);
 
-    const updatedDividend = updateDividends(
-      stock.chartData.dividend,
-      stock.chartData.stock.aggregatedAmounts,
-      ticker,
-      dates,
-      startDate
-    );
-
     const totalDividend = getMostRecentValueFromList(
-      updatedDividend.aggregatedValues
+      convertedDividend.aggregatedValues
     ).value;
     chartTotalDividendSummary += totalDividend;
+
+    const stockTotalInvested = getMostRecentValueFromList(investedForProfit).value;
+    const stockTotalCommission = getMostRecentValueFromList(commissionForProfit).value;
+    chartTotalInvestedSummary += stockTotalInvested;
+    chartTotalCommissionSummary += stockTotalCommission;
 
     chartedStocks[key] = {
       ...stock,
@@ -310,6 +341,12 @@ export function computePortfolioState(
         ...stock.summary,
         portfolioValue,
         currentSharePrice,
+        totalInvested: stockTotalInvested,
+        totalCommission: stockTotalCommission,
+        averageSharePrice:
+          stock.summary.amountOfShares !== 0
+            ? stockTotalInvested / stock.summary.amountOfShares
+            : 0,
         dailyReturn,
         weeklyReturn,
         monthlyReturn,
@@ -321,7 +358,17 @@ export function computePortfolioState(
         portfolioValues,
         profit,
         yieldPerYear,
-        dividend: updatedDividend,
+        stock: {
+          ...stock.chartData.stock,
+          transactionValues: stockTransactionValues,
+          aggregatedValues: investedForProfit,
+        },
+        commission: {
+          ...stock.chartData.commission,
+          transactionValues: commissionTransactionValues,
+          aggregatedValues: commissionForProfit,
+        },
+        dividend: convertedDividend,
       },
     };
   }
@@ -329,6 +376,9 @@ export function computePortfolioState(
   summary = {
     ...summary,
     portfolioValue: portfolioValuesSummary,
+    totalInvested: chartTotalInvestedSummary,
+    totalCommission: chartTotalCommissionSummary,
+    totalDividend: chartTotalDividendSummary,
     dailyReturn: getReturn(aggregatedPortfolioValues, aggregatedProfit, 1),
     weeklyReturn: getReturn(aggregatedPortfolioValues, aggregatedProfit, 7),
     monthlyReturn: getReturn(aggregatedPortfolioValues, aggregatedProfit, 30),
@@ -337,7 +387,6 @@ export function computePortfolioState(
       aggregatedProfit,
       aggregatedPortfolioValues.length
     ),
-    totalDividend: chartTotalDividendSummary,
   };
 
   return { transactions, stocks: chartedStocks, dates, summary, currencies };
