@@ -20,6 +20,27 @@ Run before completion:
 
 nx run-many -t lint test build --all
 
+## Frontend styling
+
+* **No @angular/material**: Do not add `@angular/material` imports. `@angular/cdk` is
+  allowed for overlay, portal, and focus-trap primitives.
+* **Tailwind-first**: All new component styles use Tailwind utility classes. The
+  canonical source of truth for colours, radii, shadows, and typography is
+  `apps/frontend/tailwind.config.js`.
+* **No hardcoded values**: Never write hex colours, rgba literals, or pixel sizes
+  directly in component SCSS. Use token names (`text-gold`, `bg-bg-surface`,
+  `shadow-card`, `font-serif`) or SCSS tokens via `@use 'tokens' as *`.
+* **SCSS component files**: May use `@use 'tokens' as *` for values not expressible
+  in Tailwind (e.g. `rgba($color-gold, 0.07)` patterns). Mixins in `_mixins.scss`
+  remain available.
+* **Icons**: Use `lucide-angular`. Register new icons in
+  `libs/frontend/ui/src/lib/icons.ts` and use `<lucide-icon name="..." [size]="20">`
+  in templates. Do not use `<mat-icon>` or the Material Icons font.
+* **Dialogs**: Use `DialogService` from `libs/frontend/ui/src/lib/dialog/dialog.service.ts`.
+  Do not use `MatDialog`.
+* **Toasts**: Use `ToastService` from `libs/frontend/state/src/lib/toast.service.ts`.
+  Do not use `MatSnackBar`.
+
 ## Workflow
 
 * Create a branch for changes.

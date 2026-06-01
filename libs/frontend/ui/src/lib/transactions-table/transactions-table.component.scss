@@ -52,7 +52,7 @@
 
   &:hover {
     border-color: $color-gold;
-    background: rgba(201, 168, 76, 0.05);
+    background: rgba($color-gold, 0.05);
   }
 }
 
@@ -94,7 +94,7 @@
   transition: $transition-base;
 
   &:hover {
-    background: rgba(201, 168, 76, 0.06);
+    background: rgba($color-gold, 0.06);
   }
 
   &::-webkit-details-marker { display: none; }
@@ -173,7 +173,7 @@
   }
 
   &:hover {
-    background: rgba(201, 168, 76, 0.06);
+    background: rgba($color-gold, 0.06);
   }
 
   span { flex: 1; }
@@ -226,12 +226,12 @@
   outline: none;
 
   &::placeholder {
-    color: rgba(143, 168, 192, 0.5);
+    color: rgba($color-muted, 0.5);
   }
 
   &:focus {
     border-color: $color-gold;
-    box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.15);
+    box-shadow: 0 0 0 2px rgba($color-gold, 0.15);
   }
 
   option {

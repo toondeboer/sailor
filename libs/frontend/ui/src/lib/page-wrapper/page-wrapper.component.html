@@ -1,29 +1,34 @@
 <div class="app-shell" [class.is-mobile]="mobileQuery.matches">
 
-  <mat-toolbar class="app-toolbar">
-    <button mat-icon-button class="menu-btn" (click)="snav.toggle()" aria-label="Toggle navigation">
-      <mat-icon>menu</mat-icon>
+  <!-- ── Toolbar ──────────────────────────────────────────────────────────── -->
+  <header class="app-toolbar">
+    <button class="menu-btn" (click)="sidenavOpen = !sidenavOpen" aria-label="Toggle navigation">
+      <lucide-icon name="Menu" [size]="20"></lucide-icon>
     </button>
     <aws-scrolling-text></aws-scrolling-text>
-  </mat-toolbar>
+  </header>
 
-  <mat-progress-bar
-    *ngIf="loading$ | async"
-    mode="indeterminate"
-    color="accent"
-    class="loading-bar"
-  ></mat-progress-bar>
+  <!-- ── Loading bar ──────────────────────────────────────────────────────── -->
+  <div *ngIf="loading$ | async" class="loading-bar">
+    <div class="loading-bar-inner"></div>
+  </div>
 
-  <mat-sidenav-container
-    class="sidenav-container"
-    [style.marginTop.px]="mobileQuery.matches ? 56 : 0"
-  >
-    <mat-sidenav
-      #snav
+  <!-- ── Body ─────────────────────────────────────────────────────────────── -->
+  <div class="app-body" [style.marginTop.px]="mobileQuery.matches ? 56 : 0">
+
+    <!-- Mobile overlay -->
+    <div
+      *ngIf="mobileQuery.matches && sidenavOpen"
+      class="sidenav-overlay"
+      (click)="sidenavOpen = false"
+    ></div>
+
+    <!-- ── Sidenav ─────────────────────────────────────────────────────────── -->
+    <nav
       class="app-sidenav"
-      [mode]="mobileQuery.matches ? 'over' : 'side'"
-      [fixedInViewport]="mobileQuery.matches"
-      fixedTopGap="56"
+      [class.sidenav-open]="sidenavOpen"
+      [class.sidenav-mobile]="mobileQuery.matches"
+      [class.sidenav-desktop-closed]="!mobileQuery.matches && !sidenavOpen"
     >
       <div class="sidenav-inner">
 
@@ -32,34 +37,33 @@
           <span class="wordmark">s<span class="ai">ai</span>lor</span>
         </div>
 
-        <mat-nav-list>
-          <a
-            mat-list-item
-            class="nav-item"
-            [class.active]="isActive(nav.path)"
-            *ngFor="let nav of navigationOptions"
-            (click)="routeTo(nav.path, snav)"
-          >
-            <span class="nav-inner">
-              <mat-icon>{{ nav.icon }}</mat-icon>
+        <ul class="nav-list">
+          <li *ngFor="let nav of navigationOptions">
+            <button
+              class="nav-item"
+              [class.active]="isActive(nav.path)"
+              (click)="routeTo(nav.path)"
+            >
+              <lucide-icon [name]="nav.icon" [size]="20" class="nav-icon"></lucide-icon>
               <span>{{ nav.text }}</span>
-            </span>
-          </a>
-        </mat-nav-list>
+            </button>
+          </li>
+        </ul>
 
         <div class="sidenav-footer">
-          <button mat-button class="logout-btn" (click)="logout()">
-            <mat-icon>logout</mat-icon>
+          <button class="logout-btn" (click)="logout()">
+            <lucide-icon name="LogOut" [size]="18"></lucide-icon>
             Log out
           </button>
         </div>
 
       </div>
-    </mat-sidenav>
+    </nav>
 
-    <mat-sidenav-content>
+    <!-- ── Main content ───────────────────────────────────────────────────── -->
+    <main class="app-content">
       <router-outlet></router-outlet>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
+    </main>
 
+  </div>
 </div>

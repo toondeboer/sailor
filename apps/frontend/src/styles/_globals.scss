@@ -28,7 +28,7 @@
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(201, 168, 76, 0.45);
+      box-shadow: 0 8px 25px rgba($color-gold, 0.45);
     }
 
     &:active {
@@ -42,7 +42,7 @@
     border: 1px solid $color-border-strong;
 
     &:hover {
-      background: rgba(201, 168, 76, 0.08);
+      background: rgba($color-gold, 0.08);
       border-color: $color-gold;
       color: $color-gold;
       transform: translateY(-2px);
@@ -117,24 +117,45 @@
   }
 }
 
-// ─── Error toast (MatSnackBar panelClass: 'error-snackbar') ──────────────────
-// Rendered in CDK overlay — must be styled globally, not in a component sheet.
-.error-snackbar {
-  --mdc-snackbar-container-color: #b00020;
-  --mdc-snackbar-supporting-text-color: #fff;
-  --mat-snack-bar-button-color: #fff;
+// ─── Toast notifications ──────────────────────────────────────────────────────
+.sailor-toast {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 12px 20px;
+  border-radius: $radius-sm;
+  font-family: $font-sans;
+  font-size: 0.875rem;
+  z-index: 9999;
+  cursor: pointer;
+  animation: fadeInUp 0.3s ease forwards;
 }
 
-// ─── Material Dialog — override CDK overlay background to match theme ─────────
-.mat-mdc-dialog-container {
-  --mdc-dialog-container-color: #{$color-bg-elevated};
-  --mdc-dialog-subhead-color: #{$color-cream};
-  --mdc-dialog-supporting-text-color: #{$color-muted};
+.sailor-toast-error {
+  background: $color-error;
+  color: white;
+  box-shadow: $shadow-card;
+}
 
-  .mat-mdc-dialog-surface {
-    background-color: $color-bg-elevated !important;
-    border: 1px solid $color-border-strong;
-    border-radius: $radius-md !important;
-    box-shadow: $shadow-card;
-  }
+.sailor-toast-dismiss {
+  animation: fadeOutDown 0.2s ease forwards;
+}
+
+@keyframes fadeOutDown {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(8px); }
+}
+
+// ─── Custom dialog backdrop (CDK overlay) ────────────────────────────────────
+.dialog-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+// ─── Custom dialog panel ──────────────────────────────────────────────────────
+.dialog-panel {
+  border-radius: $radius-md;
+  background-color: $color-bg-elevated;
+  border: 1px solid $color-border-strong;
+  box-shadow: $shadow-card;
+  overflow: hidden;
 }

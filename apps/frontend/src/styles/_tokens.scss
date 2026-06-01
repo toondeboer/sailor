@@ -1,6 +1,6 @@
-// Design tokens — the single source of truth for colours, spacing, radii,
-// shadows, motion and breakpoints. Consume with `@use 'tokens' as *;`
+// SCSS variables for component stylesheets. Consume with `@use 'tokens' as *;`
 // (resolved via stylePreprocessorOptions.includePaths).
+// Canonical source of truth for the design system is apps/frontend/tailwind.config.js.
 
 // ─── Backgrounds (dark navy dominant) ────────────────────────────────────────
 $color-bg-base:     #0A1628; // deep ocean — main page background

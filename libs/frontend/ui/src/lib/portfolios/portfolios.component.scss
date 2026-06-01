@@ -1,3 +1,5 @@
+@use 'tokens' as *;
+
 :host {
   display: block;
   height: 100%;
@@ -16,7 +18,7 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(201, 168, 76, 0.15);
+  border-right: 1px solid $color-border;
 }
 
 .portfolios-main {

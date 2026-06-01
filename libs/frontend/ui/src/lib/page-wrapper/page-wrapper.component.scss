@@ -1,6 +1,7 @@
 @use 'tokens' as *;
 @use 'mixins' as *;
 
+// ─── Shell ────────────────────────────────────────────────────────────────────
 .app-shell {
   display: flex;
   flex-direction: column;
@@ -8,64 +9,124 @@
   inset: 0;
 }
 
-// ─── Toolbar ─────────────────────────────────────────────────────────────────
+// ─── Toolbar ──────────────────────────────────────────────────────────────────
 .app-toolbar {
+  display: flex;
+  align-items: center;
+  height: 56px;
   border-bottom: 1px solid $color-border;
-  gap: 0;
+  background-color: $color-bg-surface;
   position: relative;
   z-index: 10;
-  padding: 0 !important;  // override Material default padding so ticker truly fills edge-to-edge
-}
+  padding: 0;
+  flex-shrink: 0;
 
-.is-mobile .app-toolbar {
-  position: fixed;
-  z-index: 100;
+  .is-mobile & {
+    position: fixed;
+    width: 100%;
+    z-index: 100;
+  }
 }
 
 .menu-btn {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
   margin: 0 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $color-muted;
+  border-radius: $radius-sm;
+  transition: $transition-base;
+
+  &:hover {
+    color: $color-cream;
+  }
 }
 
 aws-scrolling-text {
   flex: 1;
-  min-width: 0;   // required for overflow to work inside a flex child
+  min-width: 0;
 }
 
-// ─── Loading bar ─────────────────────────────────────────────────────────────
+// ─── Loading bar ──────────────────────────────────────────────────────────────
 .loading-bar {
+  height: 4px;
   position: relative;
   z-index: 9;
+  overflow: hidden;
+  background: transparent;
+  flex-shrink: 0;
 }
 
-// ─── Sidenav container ───────────────────────────────────────────────────────
-.sidenav-container {
+.loading-bar-inner {
+  position: absolute;
+  inset-block: 0;
+  width: 33%;
+  background: linear-gradient(90deg, transparent, $color-gold, transparent);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+// ─── Body ─────────────────────────────────────────────────────────────────────
+.app-body {
   flex: 1;
+  display: flex;
+  overflow: hidden;
 }
 
-.is-mobile .sidenav-container {
-  flex: 1 0 auto;
+// ─── Mobile overlay ───────────────────────────────────────────────────────────
+.sidenav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 40;
 }
 
-// ─── Sidenav panel ───────────────────────────────────────────────────────────
+// ─── Sidenav ──────────────────────────────────────────────────────────────────
 .app-sidenav {
   width: 220px;
-  background-color: $color-bg-surface !important;
-  border-right: 1px solid $color-border !important;
+  background-color: $color-bg-surface;
+  border-right: 1px solid $color-border;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease, border-color 0.3s ease;
+  overflow: hidden;
 
-  .sidenav-inner {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  &.sidenav-desktop-closed {
+    width: 0;
+    border-color: transparent;
   }
 
-  mat-nav-list {
-    flex: 1;
-    padding-top: 8px;
+  &.sidenav-mobile {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+
+    &.sidenav-open {
+      transform: translateX(0);
+    }
   }
 }
 
-// ─── Sidenav header (logo + wordmark) ────────────────────────────────────────
+.sidenav-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+// ─── Sidenav header ───────────────────────────────────────────────────────────
 .sidenav-header {
   display: flex;
   align-items: center;
@@ -80,66 +141,77 @@ aws-scrolling-text {
   object-fit: contain;
 }
 
-// ─── Nav items ───────────────────────────────────────────────────────────────
+// ─── Nav list ─────────────────────────────────────────────────────────────────
+.nav-list {
+  flex: 1;
+  padding: 8px 0 0;
+  margin: 0;
+  list-style: none;
+}
+
 .nav-item {
-  border-left: 3px solid transparent;
-  transition: $transition-base;
-  color: $color-muted !important;
-  border-radius: 0 $radius-sm $radius-sm 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 8px);
+  padding: 10px 16px;
   margin-right: 8px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 0 $radius-sm $radius-sm 0;
+  cursor: pointer;
+  color: $color-muted;
+  font-size: 14px;
+  transition: $transition-base;
+  text-align: left;
 
-  .nav-inner {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-  }
-
-  mat-icon {
-    color: $color-muted;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
+  .nav-icon {
     flex-shrink: 0;
     transition: $transition-base;
   }
 
-  &:hover, &.active {
+  &:hover {
     border-left-color: $color-gold;
-    color: $color-cream !important;
-    background-color: rgba(201, 168, 76, 0.07);
-
-    mat-icon {
-      color: $color-gold;
-    }
+    color: $color-cream;
+    background-color: rgba($color-gold, 0.07);
   }
 
   &.active {
-    background-color: rgba(201, 168, 76, 0.12);
+    border-left-color: $color-gold;
+    color: $color-cream;
+    background-color: rgba($color-gold, 0.12);
   }
 }
 
-// ─── Sidenav footer / logout ─────────────────────────────────────────────────
+// ─── Sidenav footer ───────────────────────────────────────────────────────────
 .sidenav-footer {
   padding: 16px 8px;
   border-top: 1px solid $color-border;
 }
 
 .logout-btn {
-  width: 100%;
-  justify-content: flex-start;
+  display: flex;
+  align-items: center;
   gap: 8px;
-  color: $color-muted !important;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  color: $color-muted;
+  font-size: 14px;
   transition: $transition-base;
 
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
   &:hover {
-    color: $color-error !important;
+    color: $color-error;
   }
+}
+
+// ─── Main content ─────────────────────────────────────────────────────────────
+.app-content {
+  flex: 1;
+  overflow: auto;
+  background-color: $color-bg-base;
 }

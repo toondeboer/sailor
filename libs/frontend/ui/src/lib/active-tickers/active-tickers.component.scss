@@ -42,7 +42,7 @@
   }
 
   &.active {
-    background: rgba(201, 168, 76, 0.12);
+    background: rgba($color-gold, 0.12);
     border-color: $color-gold;
     color: $color-gold;
   }

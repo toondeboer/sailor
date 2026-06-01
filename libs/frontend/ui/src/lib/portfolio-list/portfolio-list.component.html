@@ -1,8 +1,8 @@
 <div class="portfolio-list">
   <div class="list-header">
     <span class="list-title">Portfolios</span>
-    <button mat-icon-button class="add-btn" (click)="createPortfolio.emit()" title="New portfolio">
-      <mat-icon>add</mat-icon>
+    <button class="add-btn" (click)="createPortfolio.emit()" title="New portfolio">
+      <lucide-icon name="Plus" [size]="18"></lucide-icon>
     </button>
   </div>
 
@@ -20,20 +20,18 @@
 
       <div class="portfolio-actions" (click)="$event.stopPropagation()">
         <button
-          mat-icon-button
           class="action-btn"
           title="Rename"
           (click)="renamePortfolio.emit(portfolio)"
         >
-          <mat-icon>edit</mat-icon>
+          <lucide-icon name="Pencil" [size]="16"></lucide-icon>
         </button>
         <button
-          mat-icon-button
           class="action-btn delete-btn"
           title="Delete"
           (click)="deletePortfolio.emit(portfolio)"
         >
-          <mat-icon>delete</mat-icon>
+          <lucide-icon name="Trash2" [size]="16"></lucide-icon>
         </button>
       </div>
     </div>

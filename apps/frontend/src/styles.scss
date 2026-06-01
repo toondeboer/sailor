@@ -1,79 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
-@use '@angular/material' as mat;
 @use './styles/tokens' as *;
 @use './styles/globals';
 
-@include mat.core();
-
-// ─── Primary palette: ocean blues (500 = #1E6091 interactive) ────────────────
-$primary-palette: (
-  50:  #e3e8ef,
-  100: #b9c8d7,
-  200: #8ba5bd,
-  300: #5d83a3,
-  400: #3a6890,
-  500: #1E6091,
-  600: #1B3A5C,
-  700: #162840,
-  800: #0F2035,
-  900: #0A1628,
-  contrast: (
-    50:  rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: white,
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  ),
-);
-
-// ─── Accent palette: antique gold (500 = #C9A84C) ────────────────────────────
-$accent-palette: (
-  50:  #fdf8ec,
-  100: #f9edc8,
-  200: #f5e3a2,
-  300: #f0d87c,
-  400: #eccf5d,
-  500: #C9A84C,
-  600: #b59643,
-  700: #9a7e38,
-  800: #7f672d,
-  900: #5a4820,
-  contrast: (
-    50:  rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: rgba(black, 0.87),
-    500: rgba(black, 0.87),
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  ),
-);
-
-$primary: mat.m2-define-palette($primary-palette);
-$accent:  mat.m2-define-palette($accent-palette);
-
-$my-theme: mat.m2-define-dark-theme(
-  (
-    color: (
-      primary: $primary,
-      accent:  $accent,
-    ),
-    typography: mat.m2-define-typography-config(
-      $font-family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-    ),
-    density: 0,
-  )
-);
-
-@include mat.all-component-themes($my-theme);
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 // ─── Global base ─────────────────────────────────────────────────────────────
 html,
@@ -84,10 +15,6 @@ body {
   color: $color-cream;
   margin: 0;
   font-family: $font-sans;
-}
-
-mat-sidenav-content {
-  background-color: $page-bg;
 }
 
 // ─── Layout utilities ────────────────────────────────────────────────────────

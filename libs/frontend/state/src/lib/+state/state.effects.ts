@@ -1,7 +1,7 @@
 import { StateService } from './../state.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../toast.service';
 import { Store } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { switchMap, catchError, of, map, tap, withLatestFrom } from 'rxjs';
@@ -65,7 +65,7 @@ export class StateEffects {
     private store: Store,
     private readonly actions$: Actions,
     private readonly service: StateService,
-    private readonly snackBar: MatSnackBar
+    private readonly toastService: ToastService
   ) {}
 
   public readonly showError$ = createEffect(
@@ -85,9 +85,8 @@ export class StateEffects {
           updateSettingsFailure
         ),
         tap(({ error }) =>
-          this.snackBar.open(error || 'Something went wrong', 'Dismiss', {
+          this.toastService.open(error || 'Something went wrong', 'Dismiss', {
             duration: 6000,
-            panelClass: 'error-snackbar',
           })
         )
       ),

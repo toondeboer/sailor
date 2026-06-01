@@ -1,21 +1,29 @@
 <h2 class="dialog-title">Import CSV</h2>
 
-<mat-dialog-content class="dialog-content">
+<div class="dialog-content">
 
   <div class="field-group">
     <div class="field-label">Format</div>
-    <mat-radio-group [(ngModel)]="format" class="radio-group">
-      <mat-radio-button value="degiro">DeGiro CSV</mat-radio-button>
-      <mat-radio-button value="yahoo">Yahoo Finance CSV</mat-radio-button>
-    </mat-radio-group>
+    <div class="toggle-group">
+      <button class="toggle-option" [class.active]="format === 'degiro'" (click)="format = 'degiro'" type="button">
+        DeGiro CSV
+      </button>
+      <button class="toggle-option" [class.active]="format === 'yahoo'" (click)="format = 'yahoo'" type="button">
+        Yahoo Finance CSV
+      </button>
+    </div>
   </div>
 
   <div class="field-group">
     <div class="field-label">Import mode</div>
-    <mat-radio-group [(ngModel)]="mode" class="radio-group">
-      <mat-radio-button value="replace">Replace existing transactions</mat-radio-button>
-      <mat-radio-button value="merge">Add to existing (deduplicate)</mat-radio-button>
-    </mat-radio-group>
+    <div class="toggle-group">
+      <button class="toggle-option" [class.active]="mode === 'replace'" (click)="mode = 'replace'" type="button">
+        Replace existing
+      </button>
+      <button class="toggle-option" [class.active]="mode === 'merge'" (click)="mode = 'merge'" type="button">
+        Add &amp; deduplicate
+      </button>
+    </div>
   </div>
 
   <div class="field-group">
@@ -43,7 +51,7 @@
     </label>
   </div>
 
-</mat-dialog-content>
+</div>
 
 <div class="dialog-actions">
   <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
