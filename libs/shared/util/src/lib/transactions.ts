@@ -113,22 +113,44 @@ export function transactionsDboToTransactions(
   };
 }
 
-function getCurrency(currency: string): {
-  value: string;
-  yahooTicker?: string;
-  fxMultiplier?: number;
-} {
-  switch (currency) {
-    case 'USD':
-      return { value: 'USD', yahooTicker: 'EUR=X' };
-    case 'GBP':
-      return { value: 'GBP', yahooTicker: 'GBPEUR=X' };
-    case 'GBp':
-      // Yahoo prices UK stocks in pence; divide by 100 after applying the GBP→EUR rate.
-      return { value: 'GBp', yahooTicker: 'GBPEUR=X', fxMultiplier: 0.01 };
+function getCurrency(currency: string): { value: string } {
+  return { value: currency };
+}
+
+/**
+ * Returns the Yahoo Finance FX ticker and optional sub-unit multiplier needed
+ * to convert a stock's native currency into the chosen display currency.
+ * Returns an empty object when no conversion is required (same currency) or
+ * the pair is not supported.
+ *
+ * EUR=X  : USD → EUR rate  (multiply USD value to get EUR)
+ * GBPEUR=X: GBP → EUR rate
+ * EURUSD=X: EUR → USD rate
+ * GBPUSD=X: GBP → USD rate
+ * GBp is UK pence — use the GBP ticker then scale by 0.01.
+ */
+export function getFxTickerForConversion(
+  stockCurrency: string,
+  displayCurrency: string
+): { yahooTicker?: string; fxMultiplier?: number } {
+  if (stockCurrency === displayCurrency) return {};
+  switch (displayCurrency) {
     case 'EUR':
+      switch (stockCurrency) {
+        case 'USD': return { yahooTicker: 'EUR=X' };
+        case 'GBP': return { yahooTicker: 'GBPEUR=X' };
+        case 'GBp': return { yahooTicker: 'GBPEUR=X', fxMultiplier: 0.01 };
+        default:    return {};
+      }
+    case 'USD':
+      switch (stockCurrency) {
+        case 'EUR': return { yahooTicker: 'EURUSD=X' };
+        case 'GBP': return { yahooTicker: 'GBPUSD=X' };
+        case 'GBp': return { yahooTicker: 'GBPUSD=X', fxMultiplier: 0.01 };
+        default:    return {};
+      }
     default:
-      return { value: currency };
+      return {};
   }
 }
 
@@ -294,14 +316,14 @@ export function getStartDate(stocks: { [ticker: string]: Stock }): Date {
 }
 
 export function getCurrencies(stocks: { [ticker: string]: Stock }): string[] {
-  const currencies: string[] = [];
-  for (const key of Object.keys(stocks)) {
-    const currency = stocks[key].currency.yahooTicker;
-    if (currency && !currencies.includes(currency)) {
-      currencies.push(currency);
+  const set = new Set<string>();
+  for (const stock of Object.values(stocks)) {
+    for (const dc of ['EUR', 'USD']) {
+      const { yahooTicker } = getFxTickerForConversion(stock.currency.value, dc);
+      if (yahooTicker) set.add(yahooTicker);
     }
   }
-  return currencies;
+  return [...set];
 }
 
 export function transactionToTransactionDbo(tx: Transaction): TransactionDbo {

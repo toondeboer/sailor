@@ -18,6 +18,7 @@ import { YahooComponent } from '../yahoo/yahoo.component';
 export class ActiveTickersComponent implements OnChanges {
   @Input() dates: Date[] = [];
   @Input() stocks: { [ticker: string]: Stock } | undefined;
+  @Input() currencySymbol = '€';
 
   tickers: string[] = [];
   activeStocks: string[] = [];
