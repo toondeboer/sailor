@@ -1,9 +1,7 @@
 import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
+import { DialogRef, DIALOG_DATA, DIALOG_REF } from '../dialog/dialog-ref';
 import { Papa } from 'ngx-papaparse';
 
 export type CsvUploadDialogData = { portfolioId: string };
@@ -19,7 +17,7 @@ export type CsvUploadResult = {
   selector: 'aws-csv-upload-dialog',
   templateUrl: './csv-upload-dialog.component.html',
   styleUrls: ['./csv-upload-dialog.component.scss'],
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatRadioModule],
+  imports: [CommonModule, FormsModule],
 })
 export class CsvUploadDialogComponent {
   format: 'degiro' | 'yahoo' = 'degiro';
@@ -29,8 +27,8 @@ export class CsvUploadDialogComponent {
   isDragging = false;
 
   constructor(
-    public dialogRef: MatDialogRef<CsvUploadDialogComponent, CsvUploadResult | undefined>,
-    @Inject(MAT_DIALOG_DATA) public data: CsvUploadDialogData,
+    @Inject(DIALOG_REF) public dialogRef: DialogRef<CsvUploadDialogComponent, CsvUploadResult | undefined>,
+    @Inject(DIALOG_DATA) public data: CsvUploadDialogData,
     private papa: Papa,
     private cdr: ChangeDetectorRef
   ) {}

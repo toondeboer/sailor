@@ -10,10 +10,6 @@ import { YahooComponent } from './yahoo/yahoo.component';
 import { SummaryComponent } from './summary/summary.component';
 import { PageWrapperComponent } from './page-wrapper/page-wrapper.component';
 import { RouterModule } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatListModule } from '@angular/material/list';
-import { MatButtonModule } from '@angular/material/button';
 import { TransactionsComponent } from './transactions/transactions.component';
 import { ScrollingTextComponent } from './scrolling-text/scrolling-text.component';
 import { BarChartPerQuarterByYearComponent } from './bar-chart-per-quarter-by-year/bar-chart-per-quarter-by-year.component';
@@ -27,10 +23,6 @@ import { BarChartComponent } from './bar-chart/bar-chart.component';
     NgxEchartsModule,
     UtilModule,
     FormsModule,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatListModule,
-    MatButtonModule,
   ],
 })
 export class UiModule {}

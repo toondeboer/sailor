@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { MatDialog } from '@angular/material/dialog';
 import {
   createPortfolio,
   deletePortfolio,
@@ -28,6 +27,7 @@ import {
   CsvUploadDialogData,
   CsvUploadResult,
 } from '../csv-upload-dialog/csv-upload-dialog.component';
+import { DialogService } from '../dialog/dialog.service';
 
 @Component({
   selector: 'aws-portfolios',
@@ -40,11 +40,10 @@ export class PortfoliosComponent implements OnInit {
   allPortfolioStates$ = this.store.select(selectAllPortfolioStates);
   selectedPortfolioId: string | null = null;
 
-  constructor(private store: Store, private dialog: MatDialog) {}
+  constructor(private store: Store, private dialog: DialogService) {}
 
   ngOnInit() {
     this.store.dispatch(getData());
-    // Auto-select first portfolio when portfolios load.
     this.portfolios$.subscribe((portfolios) => {
       if (portfolios.length > 0 && !this.selectedPortfolioId) {
         this.selectedPortfolioId = portfolios[0].id;
@@ -72,9 +71,9 @@ export class PortfoliosComponent implements OnInit {
     this.dialog
       .open(PortfolioNameDialogComponent, { data, width: '380px' })
       .afterClosed()
-      .subscribe((name: string | undefined) => {
+      .subscribe((name) => {
         if (name) {
-          this.store.dispatch(createPortfolio({ name }));
+          this.store.dispatch(createPortfolio({ name: name as string }));
         }
       });
   }
@@ -87,10 +86,10 @@ export class PortfoliosComponent implements OnInit {
     this.dialog
       .open(PortfolioNameDialogComponent, { data, width: '380px' })
       .afterClosed()
-      .subscribe((newName: string | undefined) => {
+      .subscribe((newName) => {
         if (newName) {
           this.store.dispatch(
-            renamePortfolio({ portfolioId: portfolio.id, newName })
+            renamePortfolio({ portfolioId: portfolio.id, newName: newName as string })
           );
         }
       });
@@ -104,7 +103,7 @@ export class PortfoliosComponent implements OnInit {
     this.dialog
       .open(ConfirmDialogComponent, { data, width: '380px' })
       .afterClosed()
-      .subscribe((confirmed: boolean | undefined) => {
+      .subscribe((confirmed) => {
         if (confirmed) {
           if (this.selectedPortfolioId === portfolio.id) {
             this.selectedPortfolioId = null;
@@ -119,15 +118,16 @@ export class PortfoliosComponent implements OnInit {
     this.dialog
       .open(CsvUploadDialogComponent, { data, width: '460px' })
       .afterClosed()
-      .subscribe((result: CsvUploadResult | undefined) => {
-        if (!result) return;
-        if (result.format === 'degiro') {
+      .subscribe((result) => {
+        const csvResult = result as CsvUploadResult | undefined;
+        if (!csvResult) return;
+        if (csvResult.format === 'degiro') {
           this.store.dispatch(
-            importDeGiroCsv({ portfolioId: result.portfolioId, data: result.rows as any, mode: result.mode })
+            importDeGiroCsv({ portfolioId: csvResult.portfolioId, data: csvResult.rows as any, mode: csvResult.mode })
           );
         } else {
           this.store.dispatch(
-            importYahooCsv({ portfolioId: result.portfolioId, rawRows: result.rows, mode: result.mode })
+            importYahooCsv({ portfolioId: csvResult.portfolioId, rawRows: csvResult.rows, mode: csvResult.mode })
           );
         }
       });

@@ -1,6 +1,11 @@
 @use 'tokens' as *;
 @use 'mixins' as *;
 
+:host {
+  display: block;
+  background: $color-bg-elevated;
+}
+
 .dialog-title {
   @include serif-heading;
   font-size: 1.25rem;
@@ -38,25 +43,40 @@
   gap: 2px;
 }
 
-// Override Material radio button colors to match theme
-::ng-deep mat-radio-button {
-  .mdc-radio__outer-circle {
-    border-color: $color-muted !important;
+.toggle-group {
+  display: flex;
+  border: 1px solid $color-border-strong;
+  border-radius: $radius-sm;
+  overflow: hidden;
+}
+
+.toggle-option {
+  flex: 1;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  border-right: 1px solid $color-border-strong;
+  cursor: pointer;
+  color: $color-muted;
+  font-size: 0.8rem;
+  font-family: $font-sans;
+  font-weight: 500;
+  transition: $transition-base;
+  text-align: center;
+
+  &:last-child {
+    border-right: none;
   }
 
-  &.mat-mdc-radio-checked .mdc-radio__outer-circle {
-    border-color: $color-gold !important;
+  &.active {
+    background: rgba($color-gold, 0.15);
+    color: $color-gold;
+    font-weight: 600;
   }
 
-  &.mat-mdc-radio-checked .mdc-radio__inner-circle {
-    border-color: $color-gold !important;
-    background-color: $color-gold !important;
-  }
-
-  .mdc-label {
+  &:hover:not(.active) {
+    background: rgba($color-gold, 0.06);
     color: $color-cream;
-    font-size: 0.875rem;
-    font-family: $font-sans;
   }
 }
 
@@ -73,15 +93,15 @@
   &:hover,
   &.dragging {
     border-color: $color-gold;
-    background: rgba(201, 168, 76, 0.06);
+    background: rgba($color-gold, 0.06);
 
     .drop-icon { transform: scale(1.1); }
   }
 
   &.has-file {
     border-style: solid;
-    border-color: rgba(201, 168, 76, 0.5);
-    background: rgba(201, 168, 76, 0.06);
+    border-color: rgba($color-gold, 0.5);
+    background: rgba($color-gold, 0.06);
   }
 }
 

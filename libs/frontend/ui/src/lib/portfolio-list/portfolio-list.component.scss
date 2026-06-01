@@ -20,17 +20,24 @@
   padding: 20px 16px 12px;
   border-bottom: 1px solid $color-border;
   flex-shrink: 0;
+}
 
-  // Override Material icon button colour
-  button {
-    color: $color-muted !important;
-    transition: $transition-base;
+.add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $color-muted;
+  transition: $transition-base;
+  border-radius: $radius-sm;
 
-    &:hover {
-      color: $color-gold !important;
-    }
-
-    mat-icon { font-size: 20px; }
+  &:hover {
+    color: $color-gold;
   }
 }
 
@@ -60,8 +67,8 @@
   gap: 4px;
 
   &:hover {
-    background: rgba(201, 168, 76, 0.05);
-    border-left-color: rgba(201, 168, 76, 0.3);
+    background: rgba($color-gold, 0.05);
+    border-left-color: rgba($color-gold, 0.3);
 
     .portfolio-actions {
       opacity: 1;
@@ -69,7 +76,7 @@
   }
 
   &.selected {
-    background: rgba(201, 168, 76, 0.1);
+    background: rgba($color-gold, 0.1);
     border-left-color: $color-gold;
 
     .portfolio-name {
@@ -108,37 +115,26 @@
 }
 
 .action-btn {
-  width: 28px !important;
-  height: 28px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-  color: $color-muted !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $color-muted;
   transition: color 0.15s;
+  border-radius: $radius-sm;
 
   &:hover {
-    color: $color-gold !important;
-  }
-
-  .mat-mdc-button-touch-target {
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: $color-gold;
   }
 }
 
 .delete-btn:hover {
-  color: $color-error !important;
+  color: $color-error;
 }
 
 .empty-state {

@@ -1,14 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import { LucideAngularModule } from 'lucide-angular';
 import { PortfolioDbo } from '@aws/util';
 
 @Component({
   selector: 'aws-portfolio-list',
   templateUrl: './portfolio-list.component.html',
   styleUrls: ['./portfolio-list.component.scss'],
-  imports: [CommonModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, LucideAngularModule],
 })
 export class PortfolioListComponent {
   @Input() portfolios: PortfolioDbo[] = [];

@@ -1,6 +1,11 @@
 @use 'tokens' as *;
 @use 'mixins' as *;
 
+:host {
+  display: block;
+  background: $color-bg-elevated;
+}
+
 .dialog-title {
   @include serif-heading;
   font-size: 1.25rem;

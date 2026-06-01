@@ -1,5 +1,6 @@
 @use 'tokens' as *;
 @use 'mixins' as *;
+@use 'sass:color';
 
 // Reusable primitives (.btn, .wordmark, fadeInUp/shimmer, .negative etc.) live in
 // _globals.scss and are shared app-wide. This file is landing-page-specific layout only.
@@ -114,7 +115,7 @@ nav {
 
   &:hover,
   &.active {
-    background: rgba(201, 168, 76, 0.15);
+    background: rgba($color-gold, 0.15);
     border-color: $color-gold;
   }
 }
@@ -248,7 +249,7 @@ nav {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba($color-gold, 0.2), transparent);
     animation: shimmer 2s infinite;
   }
 
@@ -321,8 +322,8 @@ nav {
 
   &:nth-child(1) .feature-icon { background: $accent-gradient; }
   &:nth-child(2) .feature-icon { background: linear-gradient(135deg, $color-ocean, $color-navy-light); }
-  &:nth-child(3) .feature-icon { background: linear-gradient(135deg, #2ECC71, #1a9e56); }
-  &:nth-child(4) .feature-icon { background: linear-gradient(135deg, #8FA8C0, $color-ocean); }
+  &:nth-child(3) .feature-icon { background: linear-gradient(135deg, $color-success, color.adjust($color-success, $lightness: -15%)); }
+  &:nth-child(4) .feature-icon { background: linear-gradient(135deg, $color-muted, $color-ocean); }
 
   h3 {
     @include serif-heading;

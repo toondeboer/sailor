@@ -1,6 +1,9 @@
 import { NgxEchartsModule } from 'ngx-echarts';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { LucideAngularModule } from 'lucide-angular';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { APP_ICONS } from '@aws/ui';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { appRoutes } from './app.routes';
@@ -29,6 +32,8 @@ import { JwtInterceptor } from '../auth/jwtInterceptor/JwtInterceptor';
     YahooModule,
     StoreDevtoolsModule.instrument(),
     UiModule,
+    OverlayModule,
+    LucideAngularModule.pick(APP_ICONS),
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts'),
     }),

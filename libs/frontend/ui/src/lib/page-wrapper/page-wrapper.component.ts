@@ -6,20 +6,11 @@ import {
 } from '@angular/core';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { Router, RouterOutlet } from '@angular/router';
-import {
-  MatSidenav,
-  MatSidenavContainer,
-  MatSidenavContent,
-} from '@angular/material/sidenav';
 import { Store } from '@ngrx/store';
 import { getData, selectLoading } from '@aws/state';
 import { ScrollingTextComponent } from '../scrolling-text/scrolling-text.component';
-import { MatToolbar } from '@angular/material/toolbar';
-import { MatListItem, MatNavList } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatProgressBar } from '@angular/material/progress-bar';
-import { MatIcon } from '@angular/material/icon';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'aws-page-wrapper',
@@ -27,27 +18,20 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./page-wrapper.component.scss'],
   imports: [
     RouterOutlet,
-    MatSidenavContent,
-    MatSidenavContainer,
     ScrollingTextComponent,
-    MatToolbar,
-    MatSidenav,
-    MatNavList,
     CommonModule,
-    MatButton,
-    MatIconButton,
-    MatListItem,
-    MatProgressBar,
-    MatIcon,
+    LucideAngularModule,
   ],
 })
 export class PageWrapperComponent implements OnInit, OnDestroy {
   loading$ = this.store.select(selectLoading);
   mobileQuery: MediaQueryList;
+  sidenavOpen: boolean;
+
   navigationOptions = [
-    { path: 'dashboard',  text: 'Dashboard',  icon: 'dashboard' },
-    { path: 'portfolios', text: 'Portfolios', icon: 'folder' },
-    { path: 'settings',   text: 'Settings',   icon: 'settings' },
+    { path: 'dashboard',  text: 'Dashboard',  icon: 'LayoutDashboard' },
+    { path: 'portfolios', text: 'Portfolios', icon: 'FolderOpen' },
+    { path: 'settings',   text: 'Settings',   icon: 'Settings' },
   ];
 
   private _mobileQueryListener: () => void;
@@ -59,7 +43,13 @@ export class PageWrapperComponent implements OnInit, OnDestroy {
     private store: Store,
   ) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
-    this._mobileQueryListener = () => changeDetectorRef.detectChanges();
+    // Open by default on desktop, closed on mobile.
+    this.sidenavOpen = !this.mobileQuery.matches;
+    this._mobileQueryListener = () => {
+      // Keep sidenav open when expanding to desktop, close when shrinking to mobile.
+      this.sidenavOpen = !this.mobileQuery.matches;
+      changeDetectorRef.detectChanges();
+    };
     this.mobileQuery.addListener(this._mobileQueryListener);
   }
 
@@ -75,8 +65,10 @@ export class PageWrapperComponent implements OnInit, OnDestroy {
     return this.router.url === '/' + path || this.router.url.startsWith('/' + path + '/');
   }
 
-  routeTo(route: string, snav: MatSidenav) {
-    snav.close();
+  routeTo(route: string): void {
+    if (this.mobileQuery.matches) {
+      this.sidenavOpen = false;
+    }
     this.router.navigate([route]);
   }
 

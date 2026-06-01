@@ -1,6 +1,11 @@
 @use 'tokens' as *;
 @use 'mixins' as *;
 
+:host {
+  display: block;
+  background: $color-bg-elevated;
+}
+
 .dialog-title {
   @include serif-heading;
   font-size: 1.25rem;
@@ -42,12 +47,12 @@
   transition: $transition-base;
 
   &::placeholder {
-    color: rgba(143, 168, 192, 0.5);
+    color: rgba($color-muted, 0.5);
   }
 
   &:focus {
     border-color: $color-gold;
-    box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.15);
+    box-shadow: 0 0 0 2px rgba($color-gold, 0.15);
   }
 }
 
