@@ -34,14 +34,7 @@ export type Stock = {
   transactions: Transactions;
   summary: StockSummary;
   chartData: ChartData;
-  currency: {
-    value: string;
-    yahooTicker?: string;
-    // Multiplier applied after the FX rate conversion. Used for sub-unit
-    // currencies where Yahoo prices differ from the exchange rate unit:
-    // GBp (pence) = 0.01 × GBP, so fxMultiplier is 0.01.
-    fxMultiplier?: number;
-  };
+  currency: { value: string };
 };
 
 export type ChartData = {

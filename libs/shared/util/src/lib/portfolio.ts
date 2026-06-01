@@ -6,6 +6,7 @@ import {
   getDividendPerQuarter,
   getDividendPerQuarterByYear,
   getDividendTtmPerQuarter,
+  getFxTickerForConversion,
   getMostRecentValueFromList,
   getPortfolioValues,
   getReturn,
@@ -245,13 +246,10 @@ export function computePortfolioState(
 
     // Apply FX conversion when the stock is denominated in a currency other
     // than the display currency and a matching FX ticker is available.
-    const fxSymbol = stock.currency.yahooTicker;
-    const fxTicker =
-      displayCurrency &&
-      stock.currency.value !== displayCurrency &&
-      fxSymbol
-        ? tickers[fxSymbol]
-        : undefined;
+    const { yahooTicker: fxSymbol, fxMultiplier } = displayCurrency
+      ? getFxTickerForConversion(stock.currency.value, displayCurrency)
+      : {};
+    const fxTicker = fxSymbol ? tickers[fxSymbol] : undefined;
 
     let portfolioValues = portfolioValuesNative;
     let investedForProfit = stock.chartData.stock.aggregatedValues;
@@ -261,7 +259,7 @@ export function computePortfolioState(
     if (fxTicker) {
       const fxRates = getFxRates(dates, fxTicker);
       // fxMultiplier handles sub-unit currencies: GBp (pence) = 0.01 × GBP.
-      const m = stock.currency.fxMultiplier ?? 1;
+      const m = fxMultiplier ?? 1;
       const scaledRates = m === 1 ? fxRates : fxRates.map(r => r * m);
       portfolioValues = multiplyLists(portfolioValuesNative, scaledRates);
       investedForProfit = multiplyLists(stock.chartData.stock.aggregatedValues, scaledRates);
