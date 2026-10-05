@@ -16,6 +16,15 @@ const POOL = new CognitoUserPool({
   Storage: window.sessionStorage,
 });
 
+/**
+ * The prod user pool requires a `nickname` attribute (immutable pool setting),
+ * so derive one from the email's local part.
+ */
+export function nicknameFromEmail(email: string): string {
+  const local = email.trim().split('@')[0];
+  return local || email.trim();
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly router = inject(Router);
@@ -68,7 +77,13 @@ export class AuthService {
 
   signUp(email: string, password: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const attrs = [new CognitoUserAttribute({ Name: 'email', Value: email })];
+      const attrs = [
+        new CognitoUserAttribute({ Name: 'email', Value: email }),
+        new CognitoUserAttribute({
+          Name: 'nickname',
+          Value: nicknameFromEmail(email),
+        }),
+      ];
       POOL.signUp(email, password, attrs, [], (err) => {
         if (err) {
           reject(err);
