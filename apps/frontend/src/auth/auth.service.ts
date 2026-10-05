@@ -66,9 +66,12 @@ export class AuthService {
     });
   }
 
-  signUp(email: string, password: string): Promise<void> {
+  signUp(email: string, password: string, nickname: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const attrs = [new CognitoUserAttribute({ Name: 'email', Value: email })];
+      const attrs = [
+        new CognitoUserAttribute({ Name: 'email', Value: email }),
+        new CognitoUserAttribute({ Name: 'nickname', Value: nickname }),
+      ];
       POOL.signUp(email, password, attrs, [], (err) => {
         if (err) {
           reject(err);
