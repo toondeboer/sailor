@@ -16,6 +16,7 @@ type Step = 'register' | 'confirm';
 export class SignUpComponent {
   step: Step = 'register';
 
+  nickname = '';
   email = '';
   password = '';
   confirmPassword = '';
@@ -35,6 +36,11 @@ export class SignUpComponent {
   }
 
   async register(): Promise<void> {
+    const nickname = this.nickname.trim();
+    if (!nickname) {
+      this.error = 'Please enter a nickname.';
+      return;
+    }
     if (this.password !== this.confirmPassword) {
       this.error = 'Passwords do not match.';
       return;
@@ -42,7 +48,7 @@ export class SignUpComponent {
     this.error = '';
     this.loading = true;
     try {
-      await this.auth.signUp(this.email, this.password);
+      await this.auth.signUp(this.email, this.password, nickname);
       this.step = 'confirm';
     } catch (err: unknown) {
       this.error = err instanceof Error ? err.message : 'Sign up failed.';

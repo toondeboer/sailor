@@ -9,6 +9,18 @@
         <div class="error-banner" role="alert">{{ error }}</div>
       }
       <div class="field">
+        <label for="nickname">Nickname</label>
+        <input
+          id="nickname"
+          type="text"
+          autocomplete="nickname"
+          placeholder="What should we call you?"
+          maxlength="50"
+          [(ngModel)]="nickname"
+          [disabled]="loading"
+        />
+      </div>
+      <div class="field">
         <label for="email">Email</label>
         <input
           id="email"
@@ -49,7 +61,12 @@
         class="btn-primary"
         (click)="register()"
         [disabled]="
-          loading || !email || !password || !confirmPassword || passwordMismatch
+          loading ||
+          !nickname.trim() ||
+          !email ||
+          !password ||
+          !confirmPassword ||
+          passwordMismatch
         "
       >
         @if (!loading) {
